@@ -13,13 +13,25 @@ namespace Coinbase.Exchange.Logic.Security
 
         public string GetSignature(string body, string secret)
         {
-            var bodybytes = Encoding.UTF8.GetBytes(body);
-            var secretbytes = Encoding.UTF8.GetBytes(secret);
+            string hash;
+            var encoder = new ASCIIEncoding();
+            var code = encoder.GetBytes(secret);
+            using (HMACSHA256 hmac = new HMACSHA256(code))
+            {
+                var hmBytes = hmac.ComputeHash(encoder.GetBytes(body));
+                hash = ToHexString(hmBytes);
+            }
+            return hash;
+        }
 
-            var hash = new HMACSHA256(secretbytes);
-            var computedHash = hash.ComputeHash(bodybytes);
-
-            return Convert.ToHexString(computedHash);
+        public static string ToHexString(byte[] array)
+        {
+            StringBuilder hex = new StringBuilder(array.Length * 2);
+            foreach (byte b in array)
+            {
+                hex.AppendFormat("{0:x2}", b);
+            }
+            return hex.ToString();
         }
     }
 }
