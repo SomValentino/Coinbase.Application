@@ -1,4 +1,5 @@
-﻿using Coinbase.Exchange.Logic.Security;
+﻿using Coinbase.Exchange.Domain.Constants;
+using Coinbase.Exchange.Logic.Security;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -106,9 +107,9 @@ namespace Coinbase.Exchange.Logic.Builders
 
             var signature = _secretManager.GetSignature(payload, apiSecret.Value!);
 
-            _httpClient.DefaultRequestHeaders.Add("CB-ACCESS-KEY", apiKey.Value!);
-            _httpClient.DefaultRequestHeaders.Add("CB-ACCESS-TIMESTAMP", timestamp.ToString());
-            _httpClient.DefaultRequestHeaders.Add("CB-ACCESS-SIGN", signature);
+            _httpClient.DefaultRequestHeaders.Add(Headers.KEY, apiKey.Value!);
+            _httpClient.DefaultRequestHeaders.Add(Headers.TIMESTAMP, timestamp.ToString());
+            _httpClient.DefaultRequestHeaders.Add(Headers.SIGNATURE, signature);
         }
     }
 }
