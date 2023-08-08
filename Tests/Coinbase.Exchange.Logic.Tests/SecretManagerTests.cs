@@ -25,7 +25,6 @@ namespace Coinbase.Exchange.Logic.Tests
             var secret = "test";
 
             var timestamp = 1691494973;
-            Debug.WriteLine(timestamp);
             var url = new Uri("https://coinbase.com/api/v3/brokerage/products/BTC-USD/ticker?limit=3");
             var request_path = "/api/v3/brokerage/orders/historical/batch";
             var body = "";
@@ -34,7 +33,6 @@ namespace Coinbase.Exchange.Logic.Tests
             var payload = $"{timestamp}{method}{request_path}{body}";
 
             var signature = _secretManager.GetSignature(payload, secret);
-            Debug.WriteLine(signature);
 
             signature.Should().NotBeNull();
             signature.Should().NotBeEmpty();
