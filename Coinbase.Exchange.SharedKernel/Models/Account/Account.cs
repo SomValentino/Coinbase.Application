@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Coinbase.Exchange.Domain.Models.Account
+namespace Coinbase.Exchange.SharedKernel.Models.Account
 {
     public class Account
     {

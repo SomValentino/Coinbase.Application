@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Coinbase.Exchange.SharedKernel\Coinbase.Exchange.SharedKernel.csproj" />
-  </ItemGroup>
-
 </Project>

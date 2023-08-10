@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Coinbase.Exchange.Domain.Models.Order
+namespace Coinbase.Exchange.SharedKernel.Models.Order
 {
-    public class MarketIoc
+    public class LimitGtc
     {
-        public string Quote_size { get; set; }
         public string Base_size { get; set; }
+        public string Limit_price { get; set; }
+        public bool Post_only { get; set; }
     }
 }

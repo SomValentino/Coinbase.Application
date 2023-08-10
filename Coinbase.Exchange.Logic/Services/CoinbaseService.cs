@@ -1,13 +1,10 @@
-﻿using Coinbase.Exchange.Domain.Constants;
-using Coinbase.Exchange.Domain.Models.Account;
-using Coinbase.Exchange.Logic.Builders;
+﻿using Coinbase.Exchange.Logic.Builders;
+using Coinbase.Exchange.SharedKernel.Constants;
+using Coinbase.Exchange.SharedKernel.Models.Account;
+using Coinbase.Exchange.SharedKernel.Models.Bids;
+using Coinbase.Exchange.SharedKernel.Models.Order;
+using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.Logic.Services
 {
@@ -32,25 +29,40 @@ namespace Coinbase.Exchange.Logic.Services
             return account;
         }
 
-        public async Task<Account?> GetAllAccountAsync(string limit, string cursor)
+        public async Task<Account?> GetAllAccountAsync(params string[] query)
         {
             var accounts = await _requestBuilder
                                         .AddResource(Resources.ACCOUNTS)
-                                        .AddQueryParameters(GetQueryParameters(limit,cursor))
+                                        .AddQueryParameters(GetQueryParameters(query))
                                         .GetAsync<Account>();
             return accounts;
         }
 
-        public async Task<Domain.Models.Products.Instrument?> GetInstrumentsAsync(string limit, string offset,
-            string product_type, string product_ids, string contract_expiry_date)
+        public async Task<BestBids> GetBestBidAsk(string product_ids)
+        {
+            var bestBidAsk = await _requestBuilder.AddResource(Resources.BESTBIDASK)
+                                 .AddQueryParameters(GetQueryParameters(product_ids))
+                                 .GetAsync<BestBids>();
+            return bestBidAsk;
+        }
+
+        public async Task<Instrument?> GetInstrumentsAsync(params string[] query)
         {
             var instruments = await _requestBuilder
                                         .AddResource(Resources.PRODUCTS)
-                                        .AddQueryParameters(GetQueryParameters(limit,offset,product_type,
-                                                            product_ids,contract_expiry_date))
-                                        .GetAsync<Domain.Models.Products.Instrument?>();
+                                        .AddQueryParameters(GetQueryParameters(query))
+                                        .GetAsync<Instrument?>();
 
             return instruments;
+        }
+
+        public async Task<Orders?> GetOrdersAsync(params string[] query)
+        {
+            var orders = await _requestBuilder.AddResource(Resources.ORDERS)
+                                  .AddQueryParameters(GetQueryParameters(query))
+                                  .GetAsync<Orders>();
+
+            return orders;
         }
 
         private Dictionary<string,string> GetQueryParameters(params string[] parameters)

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Coinbase.Exchange.Domain.Models.Order
+namespace Coinbase.Exchange.SharedKernel.Models.Order
 {
     public class OrderConfiguration
     {

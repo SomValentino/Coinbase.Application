@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Coinbase.Exchange.Domain.Models.Order
+namespace Coinbase.Exchange.SharedKernel.Models.Order
 {
-    public class StopLimitGtc
+    public class LimitGtd
     {
         public string Base_size { get; set; }
         public string Limit_price { get; set; }
-        public string Stop_price { get; set; }
-        public string Stop_direction { get; set; }
+        public DateTime End_time { get; set; }
+        public bool Post_only { get; set; }
     }
 }
