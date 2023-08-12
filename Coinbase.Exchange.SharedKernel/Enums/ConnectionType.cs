@@ -8,7 +8,7 @@ namespace Coinbase.Exchange.SharedKernel.Enums
 {
    public enum ConnectionType
    {
-        subcribe = 1,
+        subscribe = 1,
         unsubscribe
    }
 }

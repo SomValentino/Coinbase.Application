@@ -1,6 +1,12 @@
-﻿using Coinbase.Exchange.Logic.Security;
+﻿using Coinbase.Client.Websocket.Channels;
+using Coinbase.Client.Websocket.Client;
+using Coinbase.Client.Websocket.Communicator;
+using Coinbase.Client.Websocket.Json;
+using Coinbase.Client.Websocket.Requests;
+using Coinbase.Exchange.Logic.Security;
 using Coinbase.Exchange.SharedKernel.Enums;
 using Coinbase.Exchange.SharedKernel.Subscription;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -12,91 +18,143 @@ using Websocket.Client;
 
 namespace Coinbase.Exchange.Logic.DataFeed
 {
-    public class CoinbaseWebSocketClient : ICoinbaseWebSocketClient,IDisposable
+    public class CoinbaseWebSocketClient : ICoinbaseWebSocketClient, IDisposable
     {
         private readonly ISecretManager _secretManager;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<CoinbaseWebSocketClient> _logger;
-        private WebsocketClient _client;
+        private CoinbaseWebsocketClient _client;
         private bool IsInitialized;
-        private List<string> _container = new List<string>();
+        private HashSet<string> product_ids;
+        ManualResetEvent _exitEvent = new ManualResetEvent(false);
 
-        private async Task Initialize(Uri uri)
+        private async Task Initialize()
         {
-            _client = new WebsocketClient(uri);
+            var communicator = new CoinbaseWebsocketCommunicator(new Uri("wss://advanced-trade-ws.coinbase.com"));
+            communicator.Name = "coinbase-1";
+            communicator.ReconnectTimeout = TimeSpan.FromMinutes(1);
 
-            _client.ReconnectTimeout = TimeSpan.FromSeconds(30);
-            _client.ReconnectionHappened.Subscribe(info => _logger.LogInformation("{info}",info));
-              
-            _client.DisconnectionHappened.Subscribe(info => _logger.LogInformation("{info}", info));
+            _client = new CoinbaseWebsocketClient(communicator);
 
-            _client.MessageReceived.Subscribe(msg => {
-                StartMessageProcessingAsync(msg);
-             });
-            await _client.Start();
+            SubscribeToStreams();
 
+            communicator.ReconnectionHappened.Subscribe(async type =>
+            {
+                _logger.LogInformation("Reconnection happend, type: {type}", type);
+
+                await SendSubscriptionRequests();
+            });
+
+            communicator.Start().Wait();
             IsInitialized = true;
         }
 
-        private void StartMessageProcessingAsync(ResponseMessage message)
+        private async Task SendSubscriptionRequests()
         {
-            _container.Add(message.Text);
-        }
+            var api_key = "BUIkOdka61km8Slz";
+            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+            var payload = $"{timestamp}heartbeats{string.Join(",", product_ids)}";
+            var secretManager = new SecretManager();
 
-        private async Task SendSubcriptionMessage(IEnumerable<string> instruments, WebSocketChannel channel, ConnectionType connectionType = ConnectionType.subcribe)
-        {
-            var api_key_setting = await _secretManager.GetSetting("BUIkOdka61km8Slz");
-            (string signature, long timestamp) = await GetTimeStampSignature(instruments, channel);
+            var signature = secretManager.GetSignature(payload, "QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
 
-            var connectionDetails = new ConnectionDetails
+            var subscription = new ConnectionDetails
             {
-                type = connectionType.ToString(),
-                channel = channel.ToString(),
-                api_key = api_key_setting.Value!,
-                product_ids = instruments,
-                signature = signature,
-                timestamp = timestamp
+                ProductIds = product_ids.ToArray(),
+                Channel = "heartbeats",
+                Signature = signature,
+                Timestamp = timestamp.ToString(),
+                ApiKey = api_key
             };
 
-            var serializedData = JsonConvert.SerializeObject(connectionDetails);
-
-            _ = Task.Run(() => _client.Send(serializedData));
+            _client.Send(subscription);
         }
 
-        private async Task<(string signature, long timestamp)> GetTimeStampSignature(IEnumerable<string> productIds, WebSocketChannel channel)
+        private void SubscribeToStreams()
         {
-            var api_secret_settiing = await _secretManager.GetSetting("QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
-            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+            _client.Streams.ErrorStream.Subscribe(x =>
+            {
+                _logger.LogError("$ Error received, message: {message}", x.Message);
+            });
 
-            var payload = $"{timestamp}{channel}{string.Join(",", productIds)}";
+            _client.Streams.SubscribeStream.Subscribe(x =>
+            {
+                _logger.LogInformation($"Subscribed, " +
+                                $"channels: {JsonConvert.SerializeObject(x.Channels, CoinbaseJsonSerializer.Settings)}");
+            });
 
-            var signature = _secretManager.GetSignature(payload, api_secret_settiing.Value!);
+            _client.Streams.HeartbeatStream.Subscribe(x =>
+                _logger.LogInformation($"Heartbeat received, product: {x.ProductId}, seq: {x.Sequence}, time: {x.Time}"));
 
-            return (signature, timestamp);
+
+            _client.Streams.TickerStream.Subscribe(x =>
+                    _logger.LogInformation($"Ticker, seq: {x.Sequence} {x.ProductId}. Bid: {x.BestBid} Ask: {x.BestAsk} Last size: {x.LastSize}, Price: {x.Price}")
+                );
+
+            _client.Streams.TradesStream.Subscribe(x =>
+            {
+                _logger.LogInformation($"Trade executed, seq: {x.Sequence} [{x.ProductId}] {x.TradeSide} price: {x.Price} size: {x.Size}");
+            });
+
+            _client.Streams.OrderBookSnapshotStream.Subscribe(x =>
+            {
+                _logger.LogInformation($"OB snapshot [{x.ProductId}] bids: {x.Bids.Length}, asks: {x.Asks.Length}");
+            });
+
+            _client.Streams.OrderBookUpdateStream.Subscribe(x =>
+            {
+                _logger.LogInformation($"OB updates [{x.ProductId}] changes: {x.Changes.Length}");
+            });
         }
 
-        public CoinbaseWebSocketClient(ISecretManager secretManager, ILogger<CoinbaseWebSocketClient> logger)
+        public CoinbaseWebSocketClient(ISecretManager secretManager,
+            IConfiguration configuration,
+            ILogger<CoinbaseWebSocketClient> logger)
         {
             _secretManager = secretManager;
+            _configuration = configuration;
             _logger = logger;
+            product_ids = new HashSet<string>();
         }
-        public async Task SubScribe(Uri uri, IEnumerable<string> instruments, WebSocketChannel channel)
+
+        private bool AddProductIds(IEnumerable<string> productIds)
         {
-            if (!IsInitialized)
+            var reconnect = false;
+            foreach (var productId in productIds)
             {
-                await Initialize(uri);
+                if(!product_ids.Contains(productId))
+                {
+                    reconnect = true;
+                    product_ids.Add(productId);
+                }
             }
-
-            await SendSubcriptionMessage(instruments, channel);
+            return reconnect;
         }
-
-        public async Task UnSubscribe(Uri uri,IEnumerable<string> instruments, WebSocketChannel channel)
-        {
-            await SendSubcriptionMessage(instruments, channel, ConnectionType.unsubscribe);
-        }
-
         public void Dispose()
         {
-            _client.Dispose();
+            throw new NotImplementedException();
         }
+
+        public async Task SubScribe(IEnumerable<string> instruments)
+        {
+            var reconnect = AddProductIds(instruments);
+            if (!IsInitialized)
+            {
+                await Initialize();
+                return;
+            }
+            if(reconnect)
+            {
+                await SendSubscriptionRequests();
+            }
+        }
+
+        public Task UnSubscribe(IEnumerable<string> instruments)
+        {
+            throw new NotImplementedException();
+        }
+
+        
     }
+
 }

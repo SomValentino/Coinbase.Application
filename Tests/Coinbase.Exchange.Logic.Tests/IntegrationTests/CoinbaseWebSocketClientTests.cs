@@ -2,6 +2,7 @@
 using Coinbase.Exchange.Logic.DataFeed;
 using Coinbase.Exchange.Logic.Security;
 using Coinbase.Exchange.SharedKernel.Enums;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
@@ -16,6 +17,7 @@ namespace Coinbase.Exchange.Logic.Tests.IntegrationTests
     {
         private SecretManager _secretManager;
         private ILogger<CoinbaseWebSocketClient> _logger;
+        private readonly IConfiguration _configuration;
         private CoinbaseWebSocketClient _webSocketClient;
 
         public CoinbaseWebSocketClientTests()
@@ -24,19 +26,20 @@ namespace Coinbase.Exchange.Logic.Tests.IntegrationTests
             _secretManager = new SecretManager();
 
             _logger = Mock.Of<ILogger<CoinbaseWebSocketClient>>();
-            _webSocketClient = new CoinbaseWebSocketClient(_secretManager, _logger);
+            _configuration = Mock.Of<IConfiguration>();
+            _webSocketClient = new CoinbaseWebSocketClient(_secretManager,_configuration, _logger);
         }
 
 
         [Fact]
         public async Task CoinbaseWebSocketClient_WhenSubscribed_ReceiveMessages()
         {
-            var uri = new Uri("wss://advanced-trade-ws.coinbase.com");
-            var product_ids = new[] {"ETH-USD", "ETH-EUR" };
-            var channel = WebSocketChannel.level2;
+            ManualResetEvent ExitEvent = new ManualResetEvent(false);
+            var uri = new Uri("wss://ws-feed.pro.coinbase.com");
+            var product_ids = new[] {"BTC-USDC" };
 
-            await _webSocketClient.SubScribe(uri, product_ids, channel);
-            await Task.Delay(3000);
+            await _webSocketClient.SubScribe( product_ids);
+            ExitEvent.WaitOne();
         }
     }
 }

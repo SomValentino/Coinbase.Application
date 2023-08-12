@@ -9,7 +9,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
 {
     public interface ICoinbaseWebSocketClient
     {
-        Task SubScribe(Uri uri,IEnumerable<string> instruments, WebSocketChannel channel);
-        Task UnSubscribe(Uri uri, IEnumerable<string> instruments, WebSocketChannel channel);
+        Task SubScribe(IEnumerable<string> instruments);
+        Task UnSubscribe(IEnumerable<string> instruments);
     }
 }

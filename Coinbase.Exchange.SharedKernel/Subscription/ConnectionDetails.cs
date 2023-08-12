@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Coinbase.Client.Websocket.Requests;
+using Coinbase.Exchange.SharedKernel.Enums;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +9,16 @@ using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.SharedKernel.Subscription
 {
-    public class ConnectionDetails
+    public class ConnectionDetails : RequestBase
     {
-        public string type { get; set; }
-        public string channel { get; set; }
-        public string api_key { get; set; }
-        public string signature { get; set; }
-        public long timestamp { get; set; }
-        public IEnumerable<string> product_ids { get; set;}
+        public override string Type => ConnectionType.subscribe.ToString();
+        public string Channel { get; set; }
+        [JsonProperty("api_key")]
+        public string ApiKey { get; set; }
+        public string Signature { get; set; }
+        public string Timestamp { get; set; }
+        [JsonProperty("product_ids")]
+        public IEnumerable<string> ProductIds { get; set;}
 
     }
 }
