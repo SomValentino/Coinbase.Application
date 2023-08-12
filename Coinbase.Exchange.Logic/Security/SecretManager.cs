@@ -6,9 +6,9 @@ namespace Coinbase.Exchange.Logic.Security
 {
     public class SecretManager : ISecretManager
     {
-        public Task<Setting> GetSetting(string key)
+        public async Task<Setting> GetSetting(string key)
         {
-            throw new NotImplementedException();
+            return new Setting { Value = key };
         }
 
         public string GetSignature(string body, string secret)

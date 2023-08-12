@@ -8,12 +8,12 @@ namespace Coinbase.Exchange.SharedKernel.Subscription
 {
     public class ConnectionDetails
     {
-        public string Type { get; set; }
-        public string Channel { get; set; }
-        public string Api_key { get; set; }
-        public string Signature { get; set; }
-        public long Timestamp { get; set; }
-        public IEnumerable<string> Product_ids { get; set;}
+        public string type { get; set; }
+        public string channel { get; set; }
+        public string api_key { get; set; }
+        public string signature { get; set; }
+        public long timestamp { get; set; }
+        public IEnumerable<string> product_ids { get; set;}
 
     }
 }
