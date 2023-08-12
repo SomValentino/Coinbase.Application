@@ -23,89 +23,58 @@ namespace Coinbase.Exchange.Logic.DataFeed
         private readonly ISecretManager _secretManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<CoinbaseWebSocketClient> _logger;
-        private CoinbaseWebsocketClient _client;
+        private WebsocketClient _client;
         private bool IsInitialized;
         private HashSet<string> product_ids;
         ManualResetEvent _exitEvent = new ManualResetEvent(false);
 
         private async Task Initialize()
         {
-            var communicator = new CoinbaseWebsocketCommunicator(new Uri("wss://advanced-trade-ws.coinbase.com"));
-            communicator.Name = "coinbase-1";
-            communicator.ReconnectTimeout = TimeSpan.FromMinutes(1);
+            _client = new WebsocketClient(new Uri("wss://advanced-trade-ws.coinbase.com"));
 
-            _client = new CoinbaseWebsocketClient(communicator);
-
-            SubscribeToStreams();
-
-            communicator.ReconnectionHappened.Subscribe(async type =>
+            _client.Name = "Coinbase-1";
+            _client.ReconnectTimeout = TimeSpan.FromSeconds(120);
+            _client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
+            _client.ReconnectionHappened.Subscribe(async info =>
             {
-                _logger.LogInformation("Reconnection happend, type: {type}", type);
-
                 await SendSubscriptionRequests();
             });
 
-            communicator.Start().Wait();
+            _client.MessageReceived.Subscribe(msg =>
+            {
+                Console.WriteLine($"Message received: {msg}");
+               
+            });
+            _client.Start().Wait();
             IsInitialized = true;
         }
 
         private async Task SendSubscriptionRequests()
         {
-            var api_key = "";
+            var api_key = "BUIkOdka61km8Slz";
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var payload = $"{timestamp}heartbeats{string.Join(",", product_ids)}";
+            var payload = $"{timestamp}ticker{string.Join(",", product_ids)}";
             var secretManager = new SecretManager();
 
-            var signature = secretManager.GetSignature(payload, "");
+            var signature = secretManager.GetSignature(payload, "QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
+
+
 
             var subscription = new ConnectionDetails
             {
                 ProductIds = product_ids.ToArray(),
-                Channel = "heartbeats",
+                Channel = "ticker",
                 Signature = signature,
                 Timestamp = timestamp.ToString(),
                 ApiKey = api_key
             };
 
-            _client.Send(subscription);
+            var data = JsonConvert.SerializeObject(subscription);
+
+            _client.Send(data);
         }
 
-        private void SubscribeToStreams()
-        {
-            _client.Streams.ErrorStream.Subscribe(x =>
-            {
-                _logger.LogError("$ Error received, message: {message}", x.Message);
-            });
-
-            _client.Streams.SubscribeStream.Subscribe(x =>
-            {
-                _logger.LogInformation($"Subscribed, " +
-                                $"channels: {JsonConvert.SerializeObject(x.Channels, CoinbaseJsonSerializer.Settings)}");
-            });
-
-            _client.Streams.HeartbeatStream.Subscribe(x =>
-                _logger.LogInformation($"Heartbeat received, product: {x.ProductId}, seq: {x.Sequence}, time: {x.Time}"));
-
-
-            _client.Streams.TickerStream.Subscribe(x =>
-                    _logger.LogInformation($"Ticker, seq: {x.Sequence} {x.ProductId}. Bid: {x.BestBid} Ask: {x.BestAsk} Last size: {x.LastSize}, Price: {x.Price}")
-                );
-
-            _client.Streams.TradesStream.Subscribe(x =>
-            {
-                _logger.LogInformation($"Trade executed, seq: {x.Sequence} [{x.ProductId}] {x.TradeSide} price: {x.Price} size: {x.Size}");
-            });
-
-            _client.Streams.OrderBookSnapshotStream.Subscribe(x =>
-            {
-                _logger.LogInformation($"OB snapshot [{x.ProductId}] bids: {x.Bids.Length}, asks: {x.Asks.Length}");
-            });
-
-            _client.Streams.OrderBookUpdateStream.Subscribe(x =>
-            {
-                _logger.LogInformation($"OB updates [{x.ProductId}] changes: {x.Changes.Length}");
-            });
-        }
+       
 
         public CoinbaseWebSocketClient(ISecretManager secretManager,
             IConfiguration configuration,

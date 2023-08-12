@@ -36,7 +36,7 @@ namespace Coinbase.Exchange.Logic.Tests.IntegrationTests
         {
             ManualResetEvent ExitEvent = new ManualResetEvent(false);
             var uri = new Uri("wss://ws-feed.pro.coinbase.com");
-            var product_ids = new[] {"BTC-USDC" };
+            var product_ids = new[] {"ETH-USD","BTC-USD" };
 
             await _webSocketClient.SubScribe( product_ids);
             ExitEvent.WaitOne();
