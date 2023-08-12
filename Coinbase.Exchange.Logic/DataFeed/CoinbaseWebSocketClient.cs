@@ -51,12 +51,12 @@ namespace Coinbase.Exchange.Logic.DataFeed
 
         private async Task SendSubscriptionRequests()
         {
-            var api_key = "BUIkOdka61km8Slz";
+            var api_key = "";
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var payload = $"{timestamp}heartbeats{string.Join(",", product_ids)}";
             var secretManager = new SecretManager();
 
-            var signature = secretManager.GetSignature(payload, "QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
+            var signature = secretManager.GetSignature(payload, "");
 
             var subscription = new ConnectionDetails
             {
