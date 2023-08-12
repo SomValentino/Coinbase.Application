@@ -26,7 +26,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
         private WebsocketClient _client;
         private bool IsInitialized;
         private HashSet<string> product_ids;
-        ManualResetEvent _exitEvent = new ManualResetEvent(false);
+        private List<WebSocketChannel> channels = new List<WebSocketChannel> { WebSocketChannel.ticker, WebSocketChannel.level2 };
 
         private async Task Initialize()
         {
@@ -51,27 +51,29 @@ namespace Coinbase.Exchange.Logic.DataFeed
 
         private async Task SendSubscriptionRequests()
         {
-            var api_key = "";
-            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var payload = $"{timestamp}ticker{string.Join(",", product_ids)}";
-            var secretManager = new SecretManager();
-
-            var signature = secretManager.GetSignature(payload, "");
-
-
-
-            var subscription = new ConnectionDetails
+            var api_key = "BUIkOdka61km8Slz";
+           
+            foreach(var channel in channels)
             {
-                ProductIds = product_ids.ToArray(),
-                Channel = "ticker",
-                Signature = signature,
-                Timestamp = timestamp.ToString(),
-                ApiKey = api_key
-            };
+                var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var payload = $"{timestamp}{channel}{string.Join(",", product_ids)}";
+                var secretManager = new SecretManager();
 
-            var data = JsonConvert.SerializeObject(subscription);
+                var signature = secretManager.GetSignature(payload, "QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
+                var subscription = new ConnectionDetails
+                {
+                    ProductIds = product_ids.ToArray(),
+                    Channel = channel.ToString(),
+                    Signature = signature,
+                    Timestamp = timestamp.ToString(),
+                    ApiKey = api_key
+                };
 
-            _client.Send(data);
+
+                var data = JsonConvert.SerializeObject(subscription);
+
+                _client.Send(data);
+            }
         }
 
        
