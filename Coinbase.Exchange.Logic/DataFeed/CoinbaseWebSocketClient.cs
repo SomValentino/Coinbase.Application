@@ -1,19 +1,9 @@
-﻿using Coinbase.Client.Websocket.Channels;
-using Coinbase.Client.Websocket.Client;
-using Coinbase.Client.Websocket.Communicator;
-using Coinbase.Client.Websocket.Json;
-using Coinbase.Client.Websocket.Requests;
-using Coinbase.Exchange.Logic.Security;
+﻿using Coinbase.Exchange.Logic.Security;
 using Coinbase.Exchange.SharedKernel.Enums;
-using Coinbase.Exchange.SharedKernel.Subscription;
+using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Websocket.Client;
 
 namespace Coinbase.Exchange.Logic.DataFeed
@@ -55,13 +45,11 @@ namespace Coinbase.Exchange.Logic.DataFeed
            
             foreach(var channel in channels)
             {
-                var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-                var payload = $"{timestamp}{channel}{string.Join(",", product_ids)}";
-                var secretManager = new SecretManager();
-
-                var signature = secretManager.GetSignature(payload, "");
+                
+                (var timestamp, var signature) = GetTimeStampSignature(channel);
                 var subscription = new ConnectionDetails
                 {
+                    Type = ConnectionType.subscribe.ToString(),
                     ProductIds = product_ids.ToArray(),
                     Channel = channel.ToString(),
                     Signature = signature,
@@ -76,7 +64,41 @@ namespace Coinbase.Exchange.Logic.DataFeed
             }
         }
 
-       
+        private (long timestamp, string signature) GetTimeStampSignature(WebSocketChannel channel)
+        {
+            var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+            var payload = $"{timestamp}{channel}{string.Join(",", product_ids)}";
+            var secretManager = new SecretManager();
+
+            var signature = secretManager.GetSignature(payload, "");
+            return (timestamp, signature);
+        }
+
+        private bool AddProductIds(IEnumerable<string> productIds)
+        {
+            var reconnect = false;
+            foreach (var productId in productIds)
+            {
+                if (!product_ids.Contains(productId))
+                {
+                    reconnect = true;
+                    product_ids.Add(productId);
+                }
+            }
+            return reconnect;
+        }
+        private void RemoveProductIds(IEnumerable<string> productIds)
+        {
+
+            foreach (var productId in productIds)
+            {
+                if (product_ids.Contains(productId))
+                {
+                    product_ids.Remove(productId);
+                }
+            }
+        }
+
 
         public CoinbaseWebSocketClient(ISecretManager secretManager,
             IConfiguration configuration,
@@ -88,22 +110,10 @@ namespace Coinbase.Exchange.Logic.DataFeed
             product_ids = new HashSet<string>();
         }
 
-        private bool AddProductIds(IEnumerable<string> productIds)
-        {
-            var reconnect = false;
-            foreach (var productId in productIds)
-            {
-                if(!product_ids.Contains(productId))
-                {
-                    reconnect = true;
-                    product_ids.Add(productId);
-                }
-            }
-            return reconnect;
-        }
+        
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _client.Dispose();
         }
 
         public async Task SubScribe(IEnumerable<string> instruments)
@@ -120,9 +130,31 @@ namespace Coinbase.Exchange.Logic.DataFeed
             }
         }
 
-        public Task UnSubscribe(IEnumerable<string> instruments)
+        public async Task UnSubscribe(IEnumerable<string>? instruments = null)
         {
-            throw new NotImplementedException();
+            var products = instruments ?? new HashSet<string>(product_ids);
+            RemoveProductIds(products);
+
+            var api_key = "";
+            foreach (var channel in channels)
+            {
+                (var timestamp, var signature) = GetTimeStampSignature(channel);
+                var subscription = new ConnectionDetails
+                {
+                    Type = ConnectionType.unsubscribe.ToString(),
+                    ProductIds = products,
+                    Channel = channel.ToString(),
+                    Signature = signature,
+                    Timestamp = timestamp.ToString(),
+                    ApiKey = api_key
+                };
+
+
+                var data = JsonConvert.SerializeObject(subscription);
+
+                _client.Send(data);
+            }
+
         }
 
         
