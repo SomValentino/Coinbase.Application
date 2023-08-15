@@ -11,6 +11,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
     public class CoinbaseWebSocketClient : ICoinbaseWebSocketClient, IDisposable
     {
         private readonly ISecretManager _secretManager;
+        private readonly IMarketDataQueue _marketQueue;
         private readonly IConfiguration _configuration;
         private readonly ILogger<CoinbaseWebSocketClient> _logger;
         private WebsocketClient _client;
@@ -30,18 +31,35 @@ namespace Coinbase.Exchange.Logic.DataFeed
                 await SendSubscriptionRequests();
             });
 
-            _client.MessageReceived.Subscribe(msg =>
+            _client.MessageReceived.Subscribe(async msg =>
             {
-                Console.WriteLine($"Message received: {msg}");
+                await SaveMessage(msg);
                
             });
             _client.Start().Wait();
             IsInitialized = true;
         }
 
+        private async Task SaveMessage(ResponseMessage msg)
+        {
+            var message = JsonConvert.DeserializeObject<SocketDataBase>(msg.Text);
+
+            if(Enum.TryParse(message!.Channel,true, out WebSocketChannel channel))
+            {
+                var marketData = new MarketData
+                {
+                    Channel = channel,
+                    SequenceNumber = message.SequenceNum,
+                    Data = msg.Text
+                };
+
+                await _marketQueue.EnqueueAsync(marketData);
+            }
+        }
+
         private async Task SendSubscriptionRequests()
         {
-            var api_key = "";
+            var api_key = "BUIkOdka61km8Slz";
            
             foreach(var channel in channels)
             {
@@ -70,7 +88,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
             var payload = $"{timestamp}{channel}{string.Join(",", product_ids)}";
             var secretManager = new SecretManager();
 
-            var signature = secretManager.GetSignature(payload, "");
+            var signature = secretManager.GetSignature(payload, "QzapTGg6JBa0P533ITVOoOvAMzByu0Wp");
             return (timestamp, signature);
         }
 
@@ -101,10 +119,12 @@ namespace Coinbase.Exchange.Logic.DataFeed
 
 
         public CoinbaseWebSocketClient(ISecretManager secretManager,
+            IMarketDataQueue marketDataQueue,
             IConfiguration configuration,
             ILogger<CoinbaseWebSocketClient> logger)
         {
             _secretManager = secretManager;
+            _marketQueue = marketDataQueue;
             _configuration = configuration;
             _logger = logger;
             product_ids = new HashSet<string>();

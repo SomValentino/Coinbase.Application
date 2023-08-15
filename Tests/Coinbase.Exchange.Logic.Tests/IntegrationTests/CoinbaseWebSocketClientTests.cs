@@ -16,6 +16,7 @@ namespace Coinbase.Exchange.Logic.Tests.IntegrationTests
     public class CoinbaseWebSocketClientTests
     {
         private SecretManager _secretManager;
+        private MarketDataQueue _marketDataQueue;
         private ILogger<CoinbaseWebSocketClient> _logger;
         private readonly IConfiguration _configuration;
         private CoinbaseWebSocketClient _webSocketClient;
@@ -24,10 +25,11 @@ namespace Coinbase.Exchange.Logic.Tests.IntegrationTests
         {
 
             _secretManager = new SecretManager();
+            _marketDataQueue = new MarketDataQueue();
 
             _logger = Mock.Of<ILogger<CoinbaseWebSocketClient>>();
             _configuration = Mock.Of<IConfiguration>();
-            _webSocketClient = new CoinbaseWebSocketClient(_secretManager,_configuration, _logger);
+            _webSocketClient = new CoinbaseWebSocketClient(_secretManager,_marketDataQueue,_configuration, _logger);
         }
 
 

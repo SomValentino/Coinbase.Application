@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Coinbase.Exchange.SharedKernel.Models.Subscription;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,8 @@ namespace Coinbase.Exchange.Logic.DataFeed
 {
     public interface IMarketDataQueue
     {
+        ValueTask EnqueueAsync(MarketData marketData);
+
+        ValueTask<MarketData> DequeueAsync(CancellationToken cancellationToken);
     }
 }
