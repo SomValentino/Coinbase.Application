@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Coinbase.Exchange.SharedKernel\Coinbase.Exchange.SharedKernel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>
