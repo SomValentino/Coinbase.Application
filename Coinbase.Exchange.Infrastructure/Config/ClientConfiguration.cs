@@ -16,6 +16,12 @@ namespace Coinbase.Exchange.Infrastructure.Config
             builder
                 .HasMany(_ => _.ProductGroups)
                 .WithMany(_ => _.Clients);
+                
+
+            builder
+                .HasOne(_ => _.ClientRegistration)
+                .WithOne(_ => _.Client)
+                .HasForeignKey<ClientRegistration>(_ => _.ClientId);
         }
     }
 }

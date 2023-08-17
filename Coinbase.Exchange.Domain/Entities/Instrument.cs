@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.Domain.Entities
 {
-    public class ProductGroup
+    public class Instrument
     {
         [Key]
-        public string Instrument { get; set; }
+        public string Name { get; set; }
         public ICollection<Client> Clients { get; set; }
     }
 }

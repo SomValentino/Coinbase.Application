@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.Domain.Specifications
 {
-    public class ClientsByProductGroupNameSpec : Specification<Domain.Entities.ProductGroup>
+    public class ClientsByProductGroupNameSpec : Specification<Domain.Entities.Instrument>
     {
         public ClientsByProductGroupNameSpec(string productName)
         {
             Query
-                .Where(group => group.Instrument.Equals(productName, StringComparison.OrdinalIgnoreCase))
+                .Where(group => group.Name.Equals(productName, StringComparison.OrdinalIgnoreCase))
                 .Include(group => group.Clients);
         }
     }

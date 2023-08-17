@@ -13,6 +13,7 @@ namespace Coinbase.Exchange.Domain.Entities
         public string ClientId { get; set; }
         [Required]
         public string ClientName { get; set; }
-        public ICollection<ProductGroup> ProductGroups { get; set; }
+        public ICollection<Instrument> ProductGroups { get; set; }
+        public ClientRegistration ClientRegistration { get; set; }
     }
 }
