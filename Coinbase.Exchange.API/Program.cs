@@ -1,4 +1,6 @@
+using Coinbase.Exchange.Infrastructure;
 using Coinbase.Exchange.Infrastructure.Data;
+using Coinbase.Exchange.Logic;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,9 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ExchangeDbContext>(_ => _.UseSqlServer(connectionString));
+builder.Services.AddServiceInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 

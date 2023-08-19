@@ -14,7 +14,7 @@ namespace Coinbase.Exchange.API.Extensions
 
                 var data = JsonConvert.SerializeObject(order);
 
-                await hubContext.Clients.Group(productId).SendAsync("receiveMarketData", data);
+                await hubContext.Clients.Group(productId).SendAsync("receiveOrderMarketData", data);
             }
         }
     }

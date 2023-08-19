@@ -13,7 +13,7 @@ namespace Coinbase.Exchange.Logic
 {
     public static class ServiceInstaller
     {
-        public static void AddServiceInfrastructure(this IServiceCollection services)
+        public static void AddApplicationServices(this IServiceCollection services)
         {
             services.AddSingleton<IMarketDataQueue, MarketDataQueue>();
             services.AddSingleton<ICoinbaseWebSocketClient, CoinbaseWebSocketClient>();
