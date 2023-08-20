@@ -1,4 +1,5 @@
-﻿using Coinbase.Exchange.SharedKernel.Enums;
+﻿using Coinbase.Exchange.SharedKernel.Constants;
+using Coinbase.Exchange.SharedKernel.Enums;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using System;
 using System.Collections;
@@ -12,16 +13,16 @@ namespace Coinbase.Exchange.Logic.DataFeed
 {
     public class MarketDataQueue : IMarketDataQueue
     {
-        private Dictionary<WebSocketChannel, int> _dataTracker;
+        private Dictionary<string, int> _dataTracker;
         private readonly Channel<MarketData> _queue;
 
         private void ResetDataTracker()
         {
-            _dataTracker = new Dictionary<WebSocketChannel, int>()
+            _dataTracker = new Dictionary<string, int>();
+            foreach(var channel in Channels.OutputChannels)
             {
-                {WebSocketChannel.ticker,-1 },
-                {WebSocketChannel.level2,-1}
-            };
+                _dataTracker.Add(channel, -1);
+            }
         }
         public MarketDataQueue()
         {

@@ -25,6 +25,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
         }
 
         private string ClientId => Context.User!.Identity!.Name;
+        private string? ClientName => Context.User!.Claims.FirstOrDefault(_ => _.Type == "name")?.Value;
 
         public override async Task OnConnectedAsync()
         {
@@ -45,34 +46,36 @@ namespace Coinbase.Exchange.API.ExchangeHub
             
             var group = await _instrumentRepository.GetBySpecAsync(new ClientsByProductGroupNameSpec(instrument));
 
-            if(group == null)
+            var client = await _clientRepository.GetByIdAsync(ClientId);
+
+            if (group == null)
             {
                 group = await _instrumentRepository.AddAsync(new Instrument
                 {
                     Name = instrument
                 });
-
-                group.Clients.Add(new Domain.Entities.Client
-                {
-                    ClientId = ClientId
-                });
-                await _webSocketClient.SubScribe(new[] { instrument });
-                await _instrumentRepository.SaveChangesAsync();
             }
-            else
+
+            var isMember = group.Clients.Any(_ => _.ClientId == ClientId);
+
+            if (!isMember)
             {
-                var client = group.Clients.SingleOrDefault(_ => _.ClientId == ClientId);
-
-                if (client == null)
+                if (client != null)
                 {
-
+                    group.Clients.Add(client);
+                }
+                else
+                {
                     group.Clients.Add(new Domain.Entities.Client
                     {
-                        ClientId = ClientId
+                        ClientId = ClientId,
+                        ClientName = ClientName!
                     });
-                    await _instrumentRepository.SaveChangesAsync();
                 }
             }
+
+            await _webSocketClient.SubScribe(new[] { instrument });
+            await _instrumentRepository.SaveChangesAsync();
 
             await Groups.AddToGroupAsync(Context.ConnectionId, instrument);
         }

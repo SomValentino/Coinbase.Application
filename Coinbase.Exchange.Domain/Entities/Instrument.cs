@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Coinbase.Exchange.Domain.Entities
 {
     public class Instrument
     {
+        public Instrument()
+        {
+            Clients = new List<Client>();
+        }
         [Key]
         public string Name { get; set; }
-        public ICollection<Client> Clients { get; set; }
+        public List<Client> Clients { get; set; } = new();
     }
 }

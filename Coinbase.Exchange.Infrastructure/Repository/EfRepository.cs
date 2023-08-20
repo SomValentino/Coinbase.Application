@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Coinbase.Exchange.Infrastructure.Data;
 
 namespace Coinbase.Exchange.Infrastructure.Repository
 {
     public class EfRepository<T> : RepositoryBase<T>, IRepository<T> where T : class
     {
-        public EfRepository(DbContext dbContext) : base(dbContext)
+        public EfRepository(ExchangeDbContext dbContext) : base(dbContext)
         {
         }
 

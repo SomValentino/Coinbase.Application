@@ -33,13 +33,13 @@ namespace Coinbase.Exchange.API.BackgroundServices
 
                 try
                 {
-                    switch (marketData.Channel)
+                    switch (marketData.Channel.ToString())
                     {
-                        case WebSocketChannel.level2:
+                        case "l2_data":
                             var orderBook = JsonConvert.DeserializeObject<OrderBook>(marketData.Data);
                             await orderBook!.Events.SendToClientsAsync(_hubContext);
                             break;
-                        case WebSocketChannel.ticker:
+                        case "ticker":
                             var tickerData = JsonConvert.DeserializeObject<Ticker>(marketData.Data);
                             await tickerData!.Events.SelectMany(_ => _.Tickers).SendToClientsAsync(_hubContext);
                             break;

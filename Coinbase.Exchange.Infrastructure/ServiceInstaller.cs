@@ -15,8 +15,7 @@ namespace Coinbase.Exchange.Infrastructure
     {
         public static void AddServiceInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ExchangeDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            
 
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         }

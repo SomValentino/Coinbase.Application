@@ -18,6 +18,7 @@ namespace Coinbase.Exchange.Logic
             services.AddSingleton<IMarketDataQueue, MarketDataQueue>();
             services.AddSingleton<ICoinbaseWebSocketClient, CoinbaseWebSocketClient>();
             services.AddScoped<ISecretManager, SecretManager>();
+            services.AddScoped<ISecurityService, SecurityService>();
             services.AddScoped<IRequestBuilder,RequestBuilder>();
             services.AddScoped<ICoinbaseService, CoinbaseService>();
         }

@@ -1,4 +1,5 @@
 ﻿using Coinbase.Exchange.Logic.Security;
+using Coinbase.Exchange.SharedKernel.Constants;
 using Coinbase.Exchange.SharedKernel.Enums;
 using Coinbase.Exchange.SharedKernel.Models.Configuration;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
@@ -20,7 +21,6 @@ namespace Coinbase.Exchange.Logic.DataFeed
         private WebsocketClient _client;
         private bool IsInitialized;
         private HashSet<string> product_ids;
-        private List<WebSocketChannel> channels = new List<WebSocketChannel> { WebSocketChannel.ticker, WebSocketChannel.level2 };
 
         private async Task Initialize()
         {
@@ -47,24 +47,21 @@ namespace Coinbase.Exchange.Logic.DataFeed
         {
             var message = JsonConvert.DeserializeObject<SocketDataBase>(msg.Text);
 
-            if(Enum.TryParse(message!.Channel,true, out WebSocketChannel channel))
+            var marketData = new MarketData
             {
-                var marketData = new MarketData
-                {
-                    Channel = channel,
-                    SequenceNumber = message.SequenceNum,
-                    Data = msg.Text
-                };
+                Channel = message!.Channel,
+                SequenceNumber = message.SequenceNum,
+                Data = msg.Text
+            };
 
-                await _marketQueue.EnqueueAsync(marketData);
-            }
+            await _marketQueue.EnqueueAsync(marketData);
         }
 
         private async Task SendSubscriptionRequests()
         {
-            var api_key = "";
+            var api_key = _apiConfig.Apikey;
            
-            foreach(var channel in channels)
+            foreach(var channel in Channels.InputChannels)
             {
                 
                 (var timestamp, var signature) = GetTimeStampSignature(channel);
@@ -85,11 +82,11 @@ namespace Coinbase.Exchange.Logic.DataFeed
             }
         }
 
-        private (long timestamp, string signature) GetTimeStampSignature(WebSocketChannel channel)
+        private (long timestamp, string signature) GetTimeStampSignature(string channel)
         {
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var payload = $"{timestamp}{channel}{string.Join(",", product_ids)}";
-            var secretManager = _serviceProvider.GetRequiredService<SecretManager>();
+            var secretManager = _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<ISecretManager>();
 
             var signature = secretManager.GetSignature(payload, _apiConfig.ApiSecret);
             return (timestamp, signature);
@@ -159,7 +156,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
             RemoveProductIds(products);
 
             var api_key = _apiConfig.Apikey;
-            foreach (var channel in channels)
+            foreach (var channel in Channels.InputChannels)
             {
                 (var timestamp, var signature) = GetTimeStampSignature(channel);
                 var subscription = new ConnectionDetails

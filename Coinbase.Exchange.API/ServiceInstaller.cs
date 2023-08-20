@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
@@ -37,27 +39,6 @@ namespace Coinbase.Exchange.API
                         RoleClaimType = ClaimTypes.Role,
                         NameClaimType = ClaimTypes.NameIdentifier
                     };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context => {
-                            var accessToken = context.Request.Query["access_token"];
-
-                            logger.LogInformation("Obtained access token from query string: {token}", accessToken);
-
-                            // If the request is for our hub...
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments("/exchangesubscription")))
-                            {
-                                // Read the token out of the query string
-                                context.Token = accessToken;
-
-                                logger.LogInformation("Setting token in http request context");
-                            }
-                            return Task.CompletedTask;
-                        }
-                    };
                 });
 
             services.AddAuthorization(options =>
@@ -76,6 +57,43 @@ namespace Coinbase.Exchange.API
             });
 
             services.AddHostedService<ExchangeWorker>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Coinbase API",
+                    Description = "Coinbase API",
+                    Version = "v1"
+                });
+
+                c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "JWT Authorization header using the Bearer scheme."
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "BearerAuth"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+                //var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                //c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            });
         }
     }
 }

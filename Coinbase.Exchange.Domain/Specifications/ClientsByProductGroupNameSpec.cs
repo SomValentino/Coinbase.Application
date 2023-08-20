@@ -12,7 +12,7 @@ namespace Coinbase.Exchange.Domain.Specifications
         public ClientsByProductGroupNameSpec(string productName)
         {
             Query
-                .Where(group => group.Name.Equals(productName, StringComparison.OrdinalIgnoreCase))
+                .Where(group => group.Name == productName)
                 .Include(group => group.Clients);
         }
     }

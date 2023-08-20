@@ -9,7 +9,7 @@ namespace Coinbase.Exchange.SharedKernel.Models.Subscription
 {
     public class MarketData
     {
-        public WebSocketChannel Channel { get; set; }
+        public string Channel { get; set; }
         public int SequenceNumber { get; set; }
         public string Data { get; set; }
     }
