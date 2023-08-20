@@ -1,7 +1,7 @@
+using Coinbase.Exchange.API;
 using Coinbase.Exchange.Infrastructure;
-using Coinbase.Exchange.Infrastructure.Data;
 using Coinbase.Exchange.Logic;
-using Microsoft.EntityFrameworkCore;
+using Coinbase.Exchange.SharedKernel.Models.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +14,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddServiceInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.Configure<ApiConfiguration>(builder.Configuration.GetSection("ApiSettings"));
+builder.Services.AddAPIServices(builder.Configuration);
 
 var app = builder.Build();
 

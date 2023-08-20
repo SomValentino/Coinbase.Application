@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace Coinbase.Exchange.API.Identity
 {
-    public class ValidTokenAuthorizationHandler : AuthorizationHandler<ValidTokenrequirement>
+    public class ValidTokenAuthorizationHandler : AuthorizationHandler<ValidTokenRequirement>
     {
         private readonly IRepository<ClientRegistration> _repository;
 
@@ -14,7 +14,7 @@ namespace Coinbase.Exchange.API.Identity
         {
             _repository = repository;
         }
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ValidTokenrequirement requirement)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ValidTokenRequirement requirement)
         {
             var tokenId = context.User.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var clientId = context.User.Identity?.Name;

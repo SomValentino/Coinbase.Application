@@ -2,7 +2,7 @@
 
 namespace Coinbase.Exchange.API.Identity
 {
-    public class ValidTokenrequirement : IAuthorizationRequirement
+    public class ValidTokenRequirement : IAuthorizationRequirement
     {
     }
 }

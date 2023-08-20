@@ -1,5 +1,7 @@
 ﻿using Coinbase.Exchange.Logic.Security;
 using Coinbase.Exchange.SharedKernel.Constants;
+using Coinbase.Exchange.SharedKernel.Models.Configuration;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
 using System.Web;
@@ -10,12 +12,15 @@ namespace Coinbase.Exchange.Logic.Builders
     {
         private readonly HttpClient _httpClient;
         private readonly ISecretManager _secretManager;
+        private readonly ApiConfiguration _apiConfig;
 
         public RequestBuilder(IHttpClientFactory factory, 
-            ISecretManager secretManager)
+            ISecretManager secretManager,
+            IOptions<ApiConfiguration> apiConfig)
         {
             _httpClient = factory.CreateClient("coinbaseapp");
             _secretManager = secretManager;
+            _apiConfig = apiConfig.Value;
         }
         public IRequestBuilder AddCustomHeaders(Dictionary<string, string> customHeaders)
         {
@@ -93,15 +98,15 @@ namespace Coinbase.Exchange.Logic.Builders
         private UriBuilder UriBuilder => new UriBuilder(_httpClient.BaseAddress!);
         private async Task AddSecurityHeaders(string path,string method, string body="")
         {
-            var apiKey = await _secretManager.GetSetting("apiKey");
-            var apiSecret = await _secretManager.GetSetting("apiSecret");
+            var apiKey = _apiConfig.Apikey;
+            var apiSecret = _apiConfig.ApiSecret;
 
             var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var payload = $"{timestamp}{method}{path}{body}";
 
-            var signature = _secretManager.GetSignature(payload, apiSecret.Value!);
+            var signature = _secretManager.GetSignature(payload, apiSecret);
 
-            _httpClient.DefaultRequestHeaders.Add(Headers.KEY, apiKey.Value!);
+            _httpClient.DefaultRequestHeaders.Add(Headers.KEY, apiKey);
             _httpClient.DefaultRequestHeaders.Add(Headers.TIMESTAMP, timestamp.ToString());
             _httpClient.DefaultRequestHeaders.Add(Headers.SIGNATURE, signature);
         }

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coinbase.Exchange.Domain\Coinbase.Exchange.Domain.csproj" />
+    <ProjectReference Include="..\Coinbase.Exchange.Infrastructure\Coinbase.Exchange.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
