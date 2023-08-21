@@ -13,9 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase.Exchange.Logic.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase.Exchange.SharedKernel", "Coinbase.Exchange.SharedKernel\Coinbase.Exchange.SharedKernel.csproj", "{6E7A1295-F596-470C-848B-F735389100D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinbase.Exchange.API", "Coinbase.Exchange.API\Coinbase.Exchange.API.csproj", "{4A98593A-E780-4474-AFCD-29B89C58986B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase.Exchange.API", "Coinbase.Exchange.API\Coinbase.Exchange.API.csproj", "{4A98593A-E780-4474-AFCD-29B89C58986B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinbase.Exchange.Infrastructure", "Coinbase.Exchange.Infrastructure\Coinbase.Exchange.Infrastructure.csproj", "{3548C5BE-F840-4F68-B0B4-2BE50DA2CA0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coinbase.Exchange.Infrastructure", "Coinbase.Exchange.Infrastructure\Coinbase.Exchange.Infrastructure.csproj", "{3548C5BE-F840-4F68-B0B4-2BE50DA2CA0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coinbase.Exchange.FrontEnd", "Coinbase.Exchange.FrontEnd\Coinbase.Exchange.FrontEnd.csproj", "{B960BED6-2C3E-4887-8F82-00C5A465E7A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{3548C5BE-F840-4F68-B0B4-2BE50DA2CA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3548C5BE-F840-4F68-B0B4-2BE50DA2CA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3548C5BE-F840-4F68-B0B4-2BE50DA2CA0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B960BED6-2C3E-4887-8F82-00C5A465E7A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B960BED6-2C3E-4887-8F82-00C5A465E7A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B960BED6-2C3E-4887-8F82-00C5A465E7A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B960BED6-2C3E-4887-8F82-00C5A465E7A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -30,12 +30,13 @@ namespace Coinbase.Exchange.API.ExchangeHub
         public override async Task OnConnectedAsync()
         {
             
-            var client = await _clientRepository.GetByIdAsync(ClientId);
+            var client = await _clientRepository.GetBySpecAsync(new ProductGroupsByClientIdSpec(ClientId));
 
             if (client == null)
                 throw new ArgumentException($"Client with Id: {ClientId}");
             foreach(var group in client.ProductGroups)
             {
+                await _webSocketClient.SubScribe(new[] { group.Name });
                 await Groups.AddToGroupAsync(Context.ConnectionId, group.Name);
             }
             await base.OnConnectedAsync();
@@ -54,6 +55,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
                 {
                     Name = instrument
                 });
+                await _webSocketClient.SubScribe(new[] { instrument });
             }
 
             var isMember = group.Clients.Any(_ => _.ClientId == ClientId);
@@ -74,7 +76,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
                 }
             }
 
-            await _webSocketClient.SubScribe(new[] { instrument });
+            
             await _instrumentRepository.SaveChangesAsync();
 
             await Groups.AddToGroupAsync(Context.ConnectionId, instrument);
