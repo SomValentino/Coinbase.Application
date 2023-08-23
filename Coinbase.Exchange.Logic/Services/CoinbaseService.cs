@@ -1,23 +1,53 @@
-﻿using Coinbase.Exchange.Logic.Builders;
+﻿using Coinbase.Exchange.Domain.Specifications;
+using Coinbase.Exchange.Infrastructure.Repository;
+using Coinbase.Exchange.Logic.Builders;
 using Coinbase.Exchange.SharedKernel.Constants;
 using Coinbase.Exchange.SharedKernel.Models.Account;
 using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Order;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 
 namespace Coinbase.Exchange.Logic.Services
 {
     public class CoinbaseService : ICoinbaseService
     {
         private readonly IRequestBuilder _requestBuilder;
+        private readonly IRepository<Domain.Entities.Instrument> _repository;
         private readonly ILogger<CoinbaseService> _logger;
 
-        public CoinbaseService(IRequestBuilder requestBuilder, 
+        public CoinbaseService(IRequestBuilder requestBuilder,
+            IRepository<Domain.Entities.Instrument> repository,
             ILogger<CoinbaseService> logger)
         {
             _requestBuilder = requestBuilder;
+            _repository = repository;
             _logger = logger;
+        }
+
+        public async Task AddInstrumentSubscription(IEnumerable<string> instruments, Domain.Entities.Client client)
+        {
+            var instrumentsList = await _repository.GetListAsync(new InstrumentsByNamesSpec(instruments));
+
+            foreach(var instrument in instruments)
+            {
+                var instrumentInstance = instrumentsList.FirstOrDefault(_ => _.Name == instrument);
+
+                if(instrumentInstance == null)
+                {
+                    var newInstrument = await _repository.AddAsync(new Domain.Entities.Instrument()
+                                        {
+                                            Name = instrument
+                                        });
+                    newInstrument.Clients.Add(client);
+                }
+                else
+                {
+                    instrumentInstance.Clients.Add(client);
+                }
+            }
+            await _repository.SaveChangesAsync();
         }
 
         public async Task<AccountEntry?> GetAccountEntryAsync(string uuid)
@@ -63,6 +93,18 @@ namespace Coinbase.Exchange.Logic.Services
                                   .GetAsync<Orders>();
 
             return orders;
+        }
+
+        public async Task RemoveInstrumentSubscription(IEnumerable<string> instruments, Domain.Entities.Client client)
+        {
+            var instrumentsList = await _repository.GetListAsync(new InstrumentsByNamesSpec(instruments));
+
+            foreach (var instrument in instrumentsList) 
+            {
+                instrument.Clients.Remove(client);
+            }
+
+            await _repository.SaveChangesAsync();
         }
 
         private Dictionary<string,string> GetQueryParameters(params string[] parameters)

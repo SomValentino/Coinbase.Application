@@ -9,6 +9,6 @@ namespace Coinbase.Exchange.Infrastructure.Repository
 {
     public interface IRepository<T> : IRepositoryBase<T> where T : class
     {
-        Task<IEnumerable<T>> ListAsync(Specification<T> specification, CancellationToken cancellationToken = default);
+        Task<IEnumerable<T>> GetListAsync(Specification<T> specification, CancellationToken cancellationToken = default);
     }
 }

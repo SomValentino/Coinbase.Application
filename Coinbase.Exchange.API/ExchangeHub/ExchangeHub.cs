@@ -30,7 +30,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
         public override async Task OnConnectedAsync()
         {
             
-            var client = await _clientRepository.GetBySpecAsync(new ProductGroupsByClientIdSpec(ClientId));
+            var client = await _clientRepository.GetBySpecAsync(new InstrumentsByClientIdSpec(ClientId));
 
             if (client == null)
                 throw new ArgumentException($"Client with Id: {ClientId}");

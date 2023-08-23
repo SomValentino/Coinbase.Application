@@ -16,7 +16,7 @@ namespace Coinbase.Exchange.Infrastructure.Repository
         {
         }
 
-        public async Task<IEnumerable<T>> ListAsync(Specification<T> specification, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<T>> GetListAsync(Specification<T> specification, CancellationToken cancellationToken = default) where T : class
         {
             return await base.ListAsync(specification, cancellationToken);
         }
