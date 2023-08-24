@@ -7,5 +7,9 @@ namespace Coinbase.Exchange.API.Controllers
     [ApiController]
     public class InstrumentController : ControllerBase
     {
+        public InstrumentController()
+        {
+            
+        }
     }
 }

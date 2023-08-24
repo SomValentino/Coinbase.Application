@@ -1,6 +1,6 @@
 ﻿namespace Coinbase.Exchange.FrontEnd
 {
-    partial class Form1
+    partial class HomeForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -31,6 +31,9 @@
             menuStrip1 = new MenuStrip();
             panel1 = new Panel();
             pageSetupDialog1 = new PageSetupDialog();
+            btn_dashboard = new Button();
+            btn_setup = new Button();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -44,10 +47,32 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(btn_setup);
+            panel1.Controls.Add(btn_dashboard);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(804, 450);
             panel1.TabIndex = 1;
+            // 
+            // btn_dashboard
+            // 
+            btn_dashboard.Location = new Point(200, 163);
+            btn_dashboard.Name = "btn_dashboard";
+            btn_dashboard.Size = new Size(151, 68);
+            btn_dashboard.TabIndex = 0;
+            btn_dashboard.Text = "DASHBOARD";
+            btn_dashboard.UseVisualStyleBackColor = true;
+            btn_dashboard.Click += btn_dashboard_Click;
+            // 
+            // btn_setup
+            // 
+            btn_setup.Location = new Point(455, 163);
+            btn_setup.Name = "btn_setup";
+            btn_setup.Size = new Size(151, 68);
+            btn_setup.TabIndex = 1;
+            btn_setup.Text = "SETUP";
+            btn_setup.UseVisualStyleBackColor = true;
+            btn_setup.Click += btn_setup_Click;
             // 
             // Form1
             // 
@@ -59,6 +84,7 @@
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Form1";
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -68,5 +94,7 @@
         private MenuStrip menuStrip1;
         private Panel panel1;
         private PageSetupDialog pageSetupDialog1;
+        private Button btn_setup;
+        private Button btn_dashboard;
     }
 }

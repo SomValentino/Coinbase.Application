@@ -75,6 +75,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
                     ApiKey = api_key
                 };
 
+                
 
                 var data = JsonConvert.SerializeObject(subscription);
 

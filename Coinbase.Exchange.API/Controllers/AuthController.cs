@@ -1,6 +1,6 @@
 ﻿using Coinbase.Exchange.Domain.Entities;
 using Coinbase.Exchange.Logic.Security;
-using Coinbase.Exchange.SharedKernel.Models.ApiReqeuest;
+using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

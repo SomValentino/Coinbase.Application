@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Coinbase.Exchange.SharedKernel.Models.ApiReqeuest
+namespace Coinbase.Exchange.SharedKernel.Models.ApiDto
 {
     public class AuthRequest
     {

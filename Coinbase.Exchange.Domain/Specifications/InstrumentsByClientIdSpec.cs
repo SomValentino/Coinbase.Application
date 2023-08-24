@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.Domain.Specifications
 {
-    public class ProductGroupsByClientIdSpec : Specification<Domain.Entities.Client>
+    public class InstrumentsByClientIdSpec : Specification<Domain.Entities.Client>
     {
-        public ProductGroupsByClientIdSpec(string clientId)
+        public InstrumentsByClientIdSpec(string clientId)
         {
             Query.Where(client => client.ClientId == clientId)
                  .Include(client => client.ProductGroups);
