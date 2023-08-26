@@ -9,13 +9,13 @@ namespace Coinbase.Exchange.API.Extensions
 {
     public static class OrderUpdateExtensions
     {
-        public static async Task SendToClientsAsync(this IEnumerable<OrderBookUpdate> orderbookUpdate,
+        public static async Task SendToClientsAsync(this string orderbookUpdate,
             string instrument,
+            string type,
             IHubContext<ExchangeHub.ExchangeHub> hubContext)
         {
-            var data = JsonConvert.SerializeObject(orderbookUpdate);
-
-            await hubContext.Clients.Group(instrument).SendAsync("receiveOrderBookUpdate", data);
+            
+            await hubContext.Clients.Group(instrument).SendAsync("receiveOrderBookUpdate",instrument,type ,orderbookUpdate);
         }
     }
 }

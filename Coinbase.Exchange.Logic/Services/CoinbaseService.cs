@@ -14,21 +14,24 @@ namespace Coinbase.Exchange.Logic.Services
     public class CoinbaseService : ICoinbaseService
     {
         private readonly IRequestBuilder _requestBuilder;
-        private readonly IRepository<Domain.Entities.Instrument> _repository;
+        private readonly IRepository<Domain.Entities.Instrument> _instrumentRepository;
+        private readonly IRepository<Domain.Entities.Client> _clientRepository;
         private readonly ILogger<CoinbaseService> _logger;
 
         public CoinbaseService(IRequestBuilder requestBuilder,
-            IRepository<Domain.Entities.Instrument> repository,
+            IRepository<Domain.Entities.Instrument> instrumentrepository,
+            IRepository<Domain.Entities.Client> clientrepository,
             ILogger<CoinbaseService> logger)
         {
             _requestBuilder = requestBuilder;
-            _repository = repository;
+            _instrumentRepository = instrumentrepository;
+            _clientRepository = clientrepository;
             _logger = logger;
         }
 
         public async Task AddInstrumentSubscription(IEnumerable<string> instruments, Domain.Entities.Client client)
         {
-            var instrumentsList = await _repository.GetListAsync(new InstrumentsByNamesSpec(instruments));
+            var instrumentsList = await _instrumentRepository.GetListAsync(new InstrumentsByNamesSpec(instruments));
 
             foreach(var instrument in instruments)
             {
@@ -36,7 +39,7 @@ namespace Coinbase.Exchange.Logic.Services
 
                 if(instrumentInstance == null)
                 {
-                    var newInstrument = await _repository.AddAsync(new Domain.Entities.Instrument()
+                    var newInstrument = await _instrumentRepository.AddAsync(new Domain.Entities.Instrument()
                                         {
                                             Name = instrument
                                         });
@@ -47,7 +50,7 @@ namespace Coinbase.Exchange.Logic.Services
                     instrumentInstance.Clients.Add(client);
                 }
             }
-            await _repository.SaveChangesAsync();
+            await _instrumentRepository.SaveChangesAsync();
         }
 
         public async Task<AccountEntry?> GetAccountEntryAsync(string uuid)
@@ -76,6 +79,13 @@ namespace Coinbase.Exchange.Logic.Services
             return bestBidAsk;
         }
 
+        public async Task<IEnumerable<string>> GetClientSubscribedInstrumentsAsync(string clientId)
+        {
+            var client = await _clientRepository.GetBySpecAsync(new InstrumentsByClientIdSpec(clientId));
+
+            return client.ProductGroups.Select(x => x.Name);
+        }
+
         public async Task<Instrument?> GetInstrumentsAsync(params string[] query)
         {
             var instruments = await _requestBuilder
@@ -97,14 +107,14 @@ namespace Coinbase.Exchange.Logic.Services
 
         public async Task RemoveInstrumentSubscription(IEnumerable<string> instruments, Domain.Entities.Client client)
         {
-            var instrumentsList = await _repository.GetListAsync(new InstrumentsByNamesSpec(instruments));
+            var instrumentsList = await _instrumentRepository.GetListAsync(new InstrumentsByNamesSpec(instruments));
 
             foreach (var instrument in instrumentsList) 
             {
                 instrument.Clients.Remove(client);
             }
 
-            await _repository.SaveChangesAsync();
+            await _instrumentRepository.SaveChangesAsync();
         }
 
         private Dictionary<string,string> GetQueryParameters(params string[] parameters)

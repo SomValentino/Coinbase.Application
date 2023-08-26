@@ -13,6 +13,7 @@ namespace Coinbase.Exchange.Logic.Services
 
         Task<Orders?> GetOrdersAsync(params string[] query );
         Task<BestBids?> GetBestBidAsk(string product_ids);
+        Task<IEnumerable<string>> GetClientSubscribedInstrumentsAsync(string clientId);
         Task AddInstrumentSubscription(IEnumerable<string> instrument, Domain.Entities.Client client);
         Task RemoveInstrumentSubscription(IEnumerable<string> instrument, Domain.Entities.Client client);
     }

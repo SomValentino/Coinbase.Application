@@ -1,10 +1,7 @@
 ﻿using Coinbase.Exchange.API.Extensions;
 using Coinbase.Exchange.Logic.DataFeed;
-using Coinbase.Exchange.SharedKernel.Enums;
 using Coinbase.Exchange.SharedKernel.Models.ApiDto;
-using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System.Globalization;
@@ -47,65 +44,32 @@ namespace Coinbase.Exchange.API.BackgroundServices
                             var orderUpdates = orderBook!.Events
                                 .SelectMany(_ => _.Updates);
 
-                            var bids = orderUpdates.Where(_ => _.Side == "bid")
-                                .Select(_ => (_,decimal.Parse(_.PriceLevel, CultureInfo.InvariantCulture)));
+                            var bids = orderUpdates.Where(_ => _.Side == "bid");
 
-                            var offers = orderUpdates.Where(_ => _.Side == "offer")
-                                .Select(_ => (_, decimal.Parse(_.PriceLevel, CultureInfo.InvariantCulture)));
+                            var offers = orderUpdates.Where(_ => _.Side == "offer");
 
-                            var bidqueue = new PriorityQueue<OrderUpdate, decimal>(bids,new OrderUpdateComparer());
-                            if (bidqueue.Count > 0)
+                            if (bids.Any())
                             {
-                                var bestBid = bidqueue.Peek();
-
-                                var priceUpdate = new PriceUpdate
-                                {
-                                    Instrument = product_Id,
-                                    Price = decimal.Parse(bestBid.PriceLevel, CultureInfo.InvariantCulture)
-                                };
-
-                                await priceUpdate.SendToClientsAsync(nameof(bestBid),_hubContext); 
+                                await bids.First().PriceLevel.SendToClientsAsync(product_Id, "BestBid", _hubContext);
+                                await string.Join("\n",bids.Select(_ => $"{_.PriceLevel} | {_.Quantity}"))
+                                    .SendToClientsAsync(product_Id, "Bids", _hubContext);
                             }
 
-                            var offerqueue = new PriorityQueue<OrderUpdate,decimal>(offers);
-
-                            if(offerqueue.Count > 0)
+                            if (offers.Any())
                             {
-                                var bestOffer = offerqueue.Peek();
-                                var priceUpdate = new PriceUpdate
-                                {
-                                    Instrument = product_Id,
-                                    Price = decimal.Parse(bestOffer.PriceLevel, CultureInfo.InvariantCulture)
-                                };
-
-                                await priceUpdate.SendToClientsAsync(nameof(bestOffer), _hubContext);
+                                await offers.First().PriceLevel.SendToClientsAsync(product_Id, "BestOffer", _hubContext);
+                                await string.Join("\n", offers.Select(_ => $"{_.PriceLevel} | {_.Quantity}"))
+                                    .SendToClientsAsync(product_Id, "Offers", _hubContext);
                             }
-
-                            var orderBookUpdate = orderUpdates.Select(_ => new OrderBookUpdate
-                            {
-                                Instrument = product_Id,
-                                Price = decimal.Parse(_.PriceLevel, CultureInfo.InvariantCulture),
-                                Side = _.Side,
-                                EventTime = _.EventTime
-                            });
-
-                            
-
-                            await orderBookUpdate.SendToClientsAsync(product_Id, _hubContext);
-                            
                             break;
                         case "ticker":
                             var tickerData = JsonConvert.DeserializeObject<Ticker>(marketData.Data);
                             var tickers = tickerData.Events.SelectMany(_ => _.Tickers);
-                            var priceUpdates = tickers.Select(_ => new PriceUpdate
-                            {
-                                Instrument = _.ProductId,
-                                Price = decimal.Parse(_.Price, CultureInfo.InvariantCulture)
-                            });
+                            
 
-                            foreach(var priceData in priceUpdates)
+                            foreach(var priceData in tickers)
                             {
-                                await priceData.SendToClientsAsync("price",_hubContext);
+                                await priceData.Price.SendToClientsAsync(priceData.ProductId,"Price",_hubContext);
                             }
                             break;
                     }
