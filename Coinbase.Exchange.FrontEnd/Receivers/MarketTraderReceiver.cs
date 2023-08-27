@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+using Coinbase.Exchange.SharedKernel.Models.Subscription;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,20 +26,14 @@ namespace Coinbase.Exchange.FrontEnd.Receivers
 
             switch (type)
             {
-                case "BestBid":
-                    _dataStore[instrument].BestBid = data;
-                    break;
-                case "BestOffer":
-                    _dataStore[instrument].BestOffer = data;
-                    break;
                 case "Offers":
-                    _dataStore[instrument].Offers = data;
+                    _dataStore[instrument].Offers = JsonConvert.DeserializeObject<List<OrderBookUpdate>>(data);
                     break;
                 case "Bids":
-                    _dataStore[instrument].Bids = data;
+                    _dataStore[instrument].Bids = JsonConvert.DeserializeObject<List<OrderBookUpdate>>(data);
                     break;
                 case "Price":
-                    _dataStore[instrument].Price = data;
+                    _dataStore[instrument].Price = decimal.Parse(data,CultureInfo.InvariantCulture);
                     break;
             }
 

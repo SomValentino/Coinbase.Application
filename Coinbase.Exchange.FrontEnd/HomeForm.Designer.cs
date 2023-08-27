@@ -30,18 +30,25 @@
         {
             menuStrip1 = new MenuStrip();
             panel1 = new Panel();
+            button_remove_instrument = new Button();
+            button_add_instrument = new Button();
+            label_add_subscription = new Label();
+            listBox_subscribed_instruments = new ListBox();
+            listBox_instruments = new ListBox();
+            dataGridView_offers = new DataGridView();
+            dataGridView_bids = new DataGridView();
+            label_price_value = new Label();
+            label_price = new Label();
             label_instruments = new Label();
             comboBox_instruments = new ComboBox();
             label_bestoffer_value = new Label();
             label_bestbid_value = new Label();
             label_bids = new Label();
             label_bestoffer = new Label();
-            listBox_offers = new ListBox();
-            listBox_bids = new ListBox();
             pageSetupDialog1 = new PageSetupDialog();
-            label_price = new Label();
-            label_price_value = new Label();
             panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView_offers).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView_bids).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -55,6 +62,13 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(button_remove_instrument);
+            panel1.Controls.Add(button_add_instrument);
+            panel1.Controls.Add(label_add_subscription);
+            panel1.Controls.Add(listBox_subscribed_instruments);
+            panel1.Controls.Add(listBox_instruments);
+            panel1.Controls.Add(dataGridView_offers);
+            panel1.Controls.Add(dataGridView_bids);
             panel1.Controls.Add(label_price_value);
             panel1.Controls.Add(label_price);
             panel1.Controls.Add(label_instruments);
@@ -63,12 +77,90 @@
             panel1.Controls.Add(label_bestbid_value);
             panel1.Controls.Add(label_bids);
             panel1.Controls.Add(label_bestoffer);
-            panel1.Controls.Add(listBox_offers);
-            panel1.Controls.Add(listBox_bids);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(804, 509);
+            panel1.Size = new Size(1072, 509);
             panel1.TabIndex = 1;
+            // 
+            // button_remove_instrument
+            // 
+            button_remove_instrument.Location = new Point(869, 309);
+            button_remove_instrument.Name = "button_remove_instrument";
+            button_remove_instrument.Size = new Size(53, 23);
+            button_remove_instrument.TabIndex = 16;
+            button_remove_instrument.Text = "<<";
+            button_remove_instrument.UseVisualStyleBackColor = true;
+            // 
+            // button_add_instrument
+            // 
+            button_add_instrument.Location = new Point(867, 251);
+            button_add_instrument.Name = "button_add_instrument";
+            button_add_instrument.Size = new Size(55, 28);
+            button_add_instrument.TabIndex = 15;
+            button_add_instrument.Text = ">>";
+            button_add_instrument.UseVisualStyleBackColor = true;
+            // 
+            // label_add_subscription
+            // 
+            label_add_subscription.AutoSize = true;
+            label_add_subscription.Location = new Point(792, 32);
+            label_add_subscription.Name = "label_add_subscription";
+            label_add_subscription.Size = new Size(187, 15);
+            label_add_subscription.TabIndex = 14;
+            label_add_subscription.Text = "ADD INSTRUMENT SUBSCRIPTION";
+            // 
+            // listBox_subscribed_instruments
+            // 
+            listBox_subscribed_instruments.FormattingEnabled = true;
+            listBox_subscribed_instruments.ItemHeight = 15;
+            listBox_subscribed_instruments.Location = new Point(928, 79);
+            listBox_subscribed_instruments.Name = "listBox_subscribed_instruments";
+            listBox_subscribed_instruments.Size = new Size(120, 394);
+            listBox_subscribed_instruments.TabIndex = 13;
+            // 
+            // listBox_instruments
+            // 
+            listBox_instruments.FormattingEnabled = true;
+            listBox_instruments.ItemHeight = 15;
+            listBox_instruments.Location = new Point(741, 78);
+            listBox_instruments.Name = "listBox_instruments";
+            listBox_instruments.Size = new Size(120, 394);
+            listBox_instruments.TabIndex = 12;
+            // 
+            // dataGridView_offers
+            // 
+            dataGridView_offers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView_offers.Location = new Point(414, 300);
+            dataGridView_offers.Name = "dataGridView_offers";
+            dataGridView_offers.RowTemplate.Height = 25;
+            dataGridView_offers.Size = new Size(289, 173);
+            dataGridView_offers.TabIndex = 11;
+            // 
+            // dataGridView_bids
+            // 
+            dataGridView_bids.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView_bids.Location = new Point(414, 78);
+            dataGridView_bids.Name = "dataGridView_bids";
+            dataGridView_bids.RowTemplate.Height = 25;
+            dataGridView_bids.Size = new Size(289, 163);
+            dataGridView_bids.TabIndex = 10;
+            // 
+            // label_price_value
+            // 
+            label_price_value.AutoSize = true;
+            label_price_value.Location = new Point(306, 37);
+            label_price_value.Name = "label_price_value";
+            label_price_value.Size = new Size(0, 15);
+            label_price_value.TabIndex = 9;
+            // 
+            // label_price
+            // 
+            label_price.AutoSize = true;
+            label_price.Location = new Point(262, 36);
+            label_price.Name = "label_price";
+            label_price.Size = new Size(39, 15);
+            label_price.TabIndex = 8;
+            label_price.Text = "Price :";
             // 
             // label_instruments
             // 
@@ -122,46 +214,11 @@
             label_bestoffer.TabIndex = 2;
             label_bestoffer.Text = "Best Offer:";
             // 
-            // listBox_offers
-            // 
-            listBox_offers.FormattingEnabled = true;
-            listBox_offers.ItemHeight = 15;
-            listBox_offers.Location = new Point(414, 291);
-            listBox_offers.Name = "listBox_offers";
-            listBox_offers.Size = new Size(137, 169);
-            listBox_offers.TabIndex = 1;
-            // 
-            // listBox_bids
-            // 
-            listBox_bids.FormattingEnabled = true;
-            listBox_bids.ItemHeight = 15;
-            listBox_bids.Location = new Point(411, 63);
-            listBox_bids.Name = "listBox_bids";
-            listBox_bids.Size = new Size(140, 169);
-            listBox_bids.TabIndex = 0;
-            // 
-            // label_price
-            // 
-            label_price.AutoSize = true;
-            label_price.Location = new Point(262, 36);
-            label_price.Name = "label_price";
-            label_price.Size = new Size(39, 15);
-            label_price.TabIndex = 8;
-            label_price.Text = "Price :";
-            // 
-            // label_price_value
-            // 
-            label_price_value.AutoSize = true;
-            label_price_value.Location = new Point(306, 37);
-            label_price_value.Name = "label_price_value";
-            label_price_value.Size = new Size(0, 15);
-            label_price_value.TabIndex = 9;
-            // 
             // HomeForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(805, 509);
+            ClientSize = new Size(1073, 509);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -170,6 +227,8 @@
             Load += HomeForm_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView_offers).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView_bids).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -189,5 +248,12 @@
         private ComboBox comboBox_instruments;
         private Label label_price_value;
         private Label label_price;
+        private DataGridView dataGridView_bids;
+        private DataGridView dataGridView_offers;
+        private Label label_add_subscription;
+        private ListBox listBox_subscribed_instruments;
+        private ListBox listBox_instruments;
+        private Button button_remove_instrument;
+        private Button button_add_instrument;
     }
 }

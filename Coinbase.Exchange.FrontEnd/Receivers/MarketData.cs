@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+using Coinbase.Exchange.SharedKernel.Models.Subscription;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +10,8 @@ namespace Coinbase.Exchange.FrontEnd.Receivers
 {
     public class MarketData
     {
-        public string Instrument { get; set; }
-        public string Price { get; set; }
-        public string BestBid { get; set; }
-        public string BestOffer { get; set; }
-        public string Bids { get; set; }
-        public string Offers { get; set; }
+        public decimal Price { get; set; }
+        public List<OrderBookUpdate> Bids { get; set; }
+        public List<OrderBookUpdate> Offers { get; set; }
     }
 }

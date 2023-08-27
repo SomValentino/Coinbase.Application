@@ -46,45 +46,46 @@ namespace Coinbase.Exchange.FrontEnd
                 {
                     var bids = store[selected_instrument].Bids;
                     var offers = store[selected_instrument].Offers;
-                    var bestbid = store[selected_instrument].BestBid;
-                    var bestoffer = store[selected_instrument].BestOffer;
                     var price = store[selected_instrument].Price;
+
+
 
                     if (bids != null && bids.Any())
                     {
-                        listBox_bids.Invoke(() =>
+                        var source = new BindingSource();
+                        source.DataSource = bids;
+                        dataGridView_bids.Invoke(() =>
                         {
-                            listBox_bids.Items.Clear();
-                            listBox_bids.Items.Add("PRICE  |  QUANTITY");
-                            listBox_bids.Items.AddRange(bids.Split('\n'));
+                            dataGridView_bids.AutoGenerateColumns = true;
+                            dataGridView_bids.DataSource = source;
+                        });
+
+                        label_bestbid_value.Invoke(() =>
+                        {
+                            label_bestbid_value.Text = bids.First().Price.ToString();
                         });
                     }
 
 
                     if (offers != null && offers.Any())
                     {
-                        listBox_offers.Invoke(() =>
+                        var source = new BindingSource();
+                        source.DataSource = offers;
+                        dataGridView_offers.Invoke(() =>
                         {
-                            listBox_offers.Items.Clear();
-                            listBox_offers.Items.Add("PRICE  |  QUANTITY");
-                            listBox_offers.Items.AddRange(offers.Split('\n'));
+                            dataGridView_offers.AutoGenerateColumns = true;
+                            dataGridView_offers.DataSource = source;
+                        });
+
+                        label_bestoffer_value.Invoke(() =>
+                        {
+                            label_bestoffer_value.Text = offers.First().Price.ToString();
                         });
                     }
 
-
-                    label_bestbid_value.Invoke(() =>
-                    {
-                        label_bestbid_value.Text = bestbid;
-                    });
-
-                    label_bestoffer_value.Invoke(() =>
-                    {
-                        label_bestoffer_value.Text = bestoffer;
-                    });
-
                     label_price_value.Invoke(() =>
                     {
-                        label_price_value.Text = price;
+                        label_price_value.Text = price.ToString();
                     });
 
                 }

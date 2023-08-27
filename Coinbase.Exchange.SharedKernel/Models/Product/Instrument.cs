@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace Coinbase.Exchange.SharedKernel.Models.Products
     public class Instrument
     {
         public IEnumerable<Product> Products { get; set; }
-        public int Num_Products { get; set; }
+        [JsonProperty("num_products")]
+        public int NumProducts { get; set; }
     }
 }

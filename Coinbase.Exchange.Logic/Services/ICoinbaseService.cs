@@ -7,11 +7,11 @@ namespace Coinbase.Exchange.Logic.Services
 {
     public interface ICoinbaseService
     {
-        Task<Instrument?> GetInstrumentsAsync(params string[] query);
-        Task<Account?> GetAllAccountAsync(params string[] query);
+        Task<Instrument?> GetInstrumentsAsync(Dictionary<string,string> queries);
+        Task<Account?> GetAllAccountAsync(Dictionary<string, string> queries);
         Task<AccountEntry?> GetAccountEntryAsync(string uuid);
 
-        Task<Orders?> GetOrdersAsync(params string[] query );
+        Task<Orders?> GetOrdersAsync(Dictionary<string, string> queries );
         Task<BestBids?> GetBestBidAsk(string product_ids);
         Task<IEnumerable<string>> GetClientSubscribedInstrumentsAsync(string clientId);
         Task AddInstrumentSubscription(IEnumerable<string> instrument, Domain.Entities.Client client);

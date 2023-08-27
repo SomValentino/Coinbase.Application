@@ -50,15 +50,25 @@ namespace Coinbase.Exchange.API.BackgroundServices
 
                             if (bids.Any())
                             {
-                                await bids.First().PriceLevel.SendToClientsAsync(product_Id, "BestBid", _hubContext);
-                                await string.Join("\n",bids.Select(_ => $"{_.PriceLevel} | {_.Quantity}"))
+                                var serialized_bids = JsonConvert.SerializeObject(bids.Select(_ => new OrderBookUpdate
+                                {
+                                    Price = decimal.Parse(_.PriceLevel,CultureInfo.InvariantCulture),
+                                    Quantity = Math.Round(decimal.Parse(_.Quantity,CultureInfo.InvariantCulture),4),
+                                    EventTime = _.EventTime
+                                }));
+                                await serialized_bids
                                     .SendToClientsAsync(product_Id, "Bids", _hubContext);
                             }
 
                             if (offers.Any())
                             {
-                                await offers.First().PriceLevel.SendToClientsAsync(product_Id, "BestOffer", _hubContext);
-                                await string.Join("\n", offers.Select(_ => $"{_.PriceLevel} | {_.Quantity}"))
+                                var serialized_offers = JsonConvert.SerializeObject(offers.Select(_ => new OrderBookUpdate
+                                {
+                                    Price = decimal.Parse(_.PriceLevel, CultureInfo.InvariantCulture),
+                                    Quantity = Math.Round(decimal.Parse(_.Quantity, CultureInfo.InvariantCulture),4),
+                                    EventTime = _.EventTime
+                                }));
+                                await serialized_offers
                                     .SendToClientsAsync(product_Id, "Offers", _hubContext);
                             }
                             break;

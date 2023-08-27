@@ -62,11 +62,11 @@ namespace Coinbase.Exchange.Logic.Services
             return account;
         }
 
-        public async Task<Account?> GetAllAccountAsync(params string[] query)
+        public async Task<Account?> GetAllAccountAsync(Dictionary<string, string> queries)
         {
             var accounts = await _requestBuilder
                                         .AddResource(Resources.ACCOUNTS)
-                                        .AddQueryParameters(GetQueryParameters(query))
+                                        .AddQueryParameters(queries)
                                         .GetAsync<Account>();
             return accounts;
         }
@@ -86,20 +86,20 @@ namespace Coinbase.Exchange.Logic.Services
             return client.ProductGroups.Select(x => x.Name);
         }
 
-        public async Task<Instrument?> GetInstrumentsAsync(params string[] query)
+        public async Task<Instrument?> GetInstrumentsAsync(Dictionary<string, string> queries)
         {
             var instruments = await _requestBuilder
                                         .AddResource(Resources.PRODUCTS)
-                                        .AddQueryParameters(GetQueryParameters(query))
+                                        .AddQueryParameters(queries)
                                         .GetAsync<Instrument?>();
 
             return instruments;
         }
 
-        public async Task<Orders?> GetOrdersAsync(params string[] query)
+        public async Task<Orders?> GetOrdersAsync(Dictionary<string, string> queries)
         {
             var orders = await _requestBuilder.AddResource(Resources.ORDERS)
-                                  .AddQueryParameters(GetQueryParameters(query))
+                                  .AddQueryParameters(queries)
                                   .GetAsync<Orders>();
 
             return orders;

@@ -40,25 +40,29 @@ namespace Coinbase.Exchange.Logic.Builders
                 parameters[pair.Key] = pair.Value;
             }
 
-            UriBuilder.Query = parameters.ToString();
+            var builder = new UriBuilder(UriBuilder.Uri);
 
-            _httpClient.BaseAddress = UriBuilder.Uri;
+            builder.Query += parameters.ToString();
+
+            _httpClient.BaseAddress = builder.Uri;
             
             return this;
         }
 
         public IRequestBuilder AddResource(string resource)
         {
-            UriBuilder.Path +=  resource;
+            var builder = new UriBuilder(UriBuilder.Uri);
 
-            _httpClient.BaseAddress = UriBuilder.Uri;
+            builder.Path += resource;
+
+            _httpClient.BaseAddress = builder.Uri;
 
             return this;
         }
 
         public async Task<TResponse?> GetAsync<TResponse>()
         {
-            string path = UriBuilder.Path;
+            string path = _httpClient.BaseAddress!.PathAndQuery.Split('?')[0];
 
             await AddSecurityHeaders(path, "GET");
 
