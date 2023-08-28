@@ -1,5 +1,7 @@
 using Coinbase.Exchange.FrontEnd.ApiClient;
 using Coinbase.Exchange.FrontEnd.Receivers;
+using Coinbase.Exchange.SharedKernel.Models.Bids;
+using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -11,8 +13,10 @@ namespace Coinbase.Exchange.FrontEnd
         private readonly HubConnection _hubConnection;
         private readonly MarketTraderReceiver _marketDataReceiver;
         private readonly MarketDataApiClient _marketDataApiClient;
-        private readonly List<string> _subcribed_instruments;
+        private List<string> _subcribed_instruments;
         private int _selected_instrumentIndex;
+        private Dictionary<string, Product> _all_Instruments;
+        private List<string> _instruments;
 
         public HomeForm()
         {
@@ -48,46 +52,49 @@ namespace Coinbase.Exchange.FrontEnd
                     var offers = store[selected_instrument].Offers;
                     var price = store[selected_instrument].Price;
 
-
+                    label_price_value.Invoke(() =>
+                    {
+                        label_price_value.Refresh();
+                        label_price_value.Text = price.ToString();
+                    });
 
                     if (bids != null && bids.Any())
                     {
+                        var bestbid = bids[0].Price.ToString();
                         var source = new BindingSource();
                         source.DataSource = bids;
-                        dataGridView_bids.Invoke(() =>
-                        {
-                            dataGridView_bids.AutoGenerateColumns = true;
-                            dataGridView_bids.DataSource = source;
-                        });
-
                         label_bestbid_value.Invoke(() =>
                         {
-                            label_bestbid_value.Text = bids.First().Price.ToString();
+                            label_bestbid_value.Refresh();
+                            label_bestbid_value.Text = bestbid;
+                            dataGridView_bids.AutoGenerateColumns = true;
+                            dataGridView_bids.DataSource = source;
                         });
                     }
 
 
                     if (offers != null && offers.Any())
                     {
+                        var bestOffer = offers[0].Price.ToString();
                         var source = new BindingSource();
                         source.DataSource = offers;
-                        dataGridView_offers.Invoke(() =>
+                        label_bestoffer_value.Invoke(() =>
                         {
+                            label_bestoffer_value.Refresh();
+                            label_bestoffer_value.Text = bestOffer;
                             dataGridView_offers.AutoGenerateColumns = true;
                             dataGridView_offers.DataSource = source;
                         });
-
-                        label_bestoffer_value.Invoke(() =>
-                        {
-                            label_bestoffer_value.Text = offers.First().Price.ToString();
-                        });
                     }
 
-                    label_price_value.Invoke(() =>
+                }
+                else
+                {
+                    this.Invoke(() =>
                     {
-                        label_price_value.Text = price.ToString();
+                        ClearDisplay();
                     });
-
+                    
                 }
             }
         }
@@ -116,12 +123,19 @@ namespace Coinbase.Exchange.FrontEnd
             try
             {
                 var subscribed_instruments = await _marketDataApiClient.GetSubscribedInstruments();
+                _all_Instruments = await _marketDataApiClient.GetAllTradedInstruments();
 
                 if (subscribed_instruments.Any())
                 {
                     _subcribed_instruments.AddRange(subscribed_instruments);
-                    comboBox_instruments.Items.AddRange(_subcribed_instruments.ToArray());
+                    comboBox_instruments.DataSource = _subcribed_instruments;
                     comboBox_instruments.SelectedIndex = _selected_instrumentIndex;
+                    listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
+                }
+                if (_all_Instruments.Any())
+                {
+                    _instruments = _all_Instruments.Keys.Except(subscribed_instruments).ToList();
+                    listBox_instruments.DataSource = _instruments;
                 }
                 await _hubConnection.StartAsync();
             }
@@ -135,6 +149,62 @@ namespace Coinbase.Exchange.FrontEnd
         private void comboBox_instruments_SelectedIndexChanged(object sender, EventArgs e)
         {
             _selected_instrumentIndex = comboBox_instruments.SelectedIndex;
+            //ClearDisplay();
+        }
+
+        private void ClearDisplay()
+        {
+            label_bestbid_value.Text = string.Empty;
+            label_bestoffer_value.Text = string.Empty;
+            label_price_value.Text = string.Empty;
+            dataGridView_bids.DataSource = default;
+            dataGridView_offers.DataSource = default;
+        }
+
+        private async void button_add_instrument_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var instruments = listBox_instruments.SelectedItems.Cast<string>();
+
+                await _hubConnection.InvokeAsync("SubscribeMultipleAsync", instruments);
+
+                _subcribed_instruments.AddRange(instruments);
+                _instruments = _instruments.Except(instruments).ToList();
+
+                comboBox_instruments.DataSource = null;
+                comboBox_instruments.DataSource = _subcribed_instruments;
+                listBox_instruments.DataSource = _instruments;
+                listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private async void button_remove_instrument_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var instruments = listBox_subscribed_instruments.SelectedItems.Cast<string>();
+
+                await _hubConnection.InvokeAsync("UnSubscribeMultipleAsync", instruments);
+
+                _subcribed_instruments = _subcribed_instruments.Except(instruments).ToList();
+                _instruments = _instruments.Concat(instruments).ToList();
+                comboBox_instruments.DataSource = null;
+                comboBox_instruments.DataSource = _subcribed_instruments;
+                listBox_instruments.DataSource = _instruments;
+                listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
+                _selected_instrumentIndex = 0;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

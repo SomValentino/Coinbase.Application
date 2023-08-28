@@ -35,12 +35,23 @@ namespace Coinbase.Exchange.API.Controllers
         {
             var product_ids = fetchAllInstrumentDto.ProductIds != null ?
                     string.Join(",", fetchAllInstrumentDto.ProductIds) : default;
-            var queries = new Dictionary<string, string>
-                {
-                    { "product_ids", product_ids!},
-                    { "product_type", fetchAllInstrumentDto.ProductType!},
-                    { "contract_expiry_date",fetchAllInstrumentDto.ContractExpiryType!}
-                };
+            var queries = new Dictionary<string, string>();
+
+            if (product_ids != null)
+            {
+                queries.Add("product_ids", product_ids);
+            }
+
+            if(fetchAllInstrumentDto.ContractExpiryType != null)
+            {
+                queries.Add("contract_expiry_type", fetchAllInstrumentDto.ContractExpiryType);
+            }
+
+            if(fetchAllInstrumentDto.ProductType != null)
+            {
+                queries.Add("product_type", fetchAllInstrumentDto.ProductType);
+            }
+                
 
             if (fetchAllInstrumentDto.Limit.HasValue)
             {
@@ -51,7 +62,7 @@ namespace Coinbase.Exchange.API.Controllers
                 queries.Add("offset", fetchAllInstrumentDto.Offset.ToString()!);
             }
             var accounts_params = await _coinbaseService.GetInstrumentsAsync(queries);
-            return Ok(accounts_params);
+            return Ok(accounts_params.Products.Where(_ => !_.Is_Disabled).ToDictionary(_ => _.Product_Id));
         }
     }
 }

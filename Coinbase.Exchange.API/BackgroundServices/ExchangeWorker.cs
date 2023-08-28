@@ -1,6 +1,7 @@
 ﻿using Coinbase.Exchange.API.Extensions;
 using Coinbase.Exchange.Logic.DataFeed;
 using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -50,6 +51,7 @@ namespace Coinbase.Exchange.API.BackgroundServices
 
                             if (bids.Any())
                             {
+                                
                                 var serialized_bids = JsonConvert.SerializeObject(bids.Select(_ => new OrderBookUpdate
                                 {
                                     Price = decimal.Parse(_.PriceLevel,CultureInfo.InvariantCulture),

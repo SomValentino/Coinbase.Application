@@ -1,4 +1,5 @@
 ﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System;
@@ -66,9 +67,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
         {
             try
             {
-                var token = await GetAccessToken();
-
-                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                await AddTokenBearer();
 
                 var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/instrument/client");
 
@@ -83,7 +82,35 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
                 throw;
             }
         }
-        
+
+       
+        public async Task<Dictionary<string,Product>> GetAllTradedInstruments()
+        {
+            try
+            {
+                await AddTokenBearer();
+
+                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/instrument");
+
+                var instruments = JsonConvert.DeserializeObject<Dictionary<string, Product>>(response);
+
+                return instruments;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        private async Task AddTokenBearer()
+        {
+            var token = await GetAccessToken();
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
 
     }
 }

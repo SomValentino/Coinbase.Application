@@ -73,7 +73,9 @@ namespace Coinbase.Exchange.Logic.Builders
                 throw new Exception("Error occured");
             }
 
-            var data = JsonConvert.DeserializeObject<TResponse>(await response.Content.ReadAsStringAsync());
+            var datastring = await response.Content.ReadAsStringAsync();
+
+            var data = JsonConvert.DeserializeObject<TResponse>(datastring);
 
             return data;
         }

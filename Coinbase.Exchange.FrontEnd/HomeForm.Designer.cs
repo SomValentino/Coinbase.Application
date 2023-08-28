@@ -90,6 +90,7 @@
             button_remove_instrument.TabIndex = 16;
             button_remove_instrument.Text = "<<";
             button_remove_instrument.UseVisualStyleBackColor = true;
+            button_remove_instrument.Click += button_remove_instrument_Click;
             // 
             // button_add_instrument
             // 
@@ -99,6 +100,7 @@
             button_add_instrument.TabIndex = 15;
             button_add_instrument.Text = ">>";
             button_add_instrument.UseVisualStyleBackColor = true;
+            button_add_instrument.Click += button_add_instrument_Click;
             // 
             // label_add_subscription
             // 
@@ -115,6 +117,7 @@
             listBox_subscribed_instruments.ItemHeight = 15;
             listBox_subscribed_instruments.Location = new Point(928, 79);
             listBox_subscribed_instruments.Name = "listBox_subscribed_instruments";
+            listBox_subscribed_instruments.SelectionMode = SelectionMode.MultiSimple;
             listBox_subscribed_instruments.Size = new Size(120, 394);
             listBox_subscribed_instruments.TabIndex = 13;
             // 
@@ -124,6 +127,7 @@
             listBox_instruments.ItemHeight = 15;
             listBox_instruments.Location = new Point(741, 78);
             listBox_instruments.Name = "listBox_instruments";
+            listBox_instruments.SelectionMode = SelectionMode.MultiSimple;
             listBox_instruments.Size = new Size(120, 394);
             listBox_instruments.TabIndex = 12;
             // 

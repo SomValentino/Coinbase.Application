@@ -12,10 +12,10 @@ namespace Coinbase.Exchange.SharedKernel.Models.ApiDto
         public int? Limit { get; set; }
         public int? Offset { get; set; }
         [JsonProperty("product_type")]
-        public string? ProductType { get; set; } = "SPOT";
+        public string? ProductType { get; set; }
         [JsonProperty("product_ids")]
         public IEnumerable<string>? ProductIds { get; set; }
         [JsonProperty("contract_expiry_type")]
-        public string? ContractExpiryType { get; set; } = "UNKNOWN_CONTRACT_EXPIRY_TYPE";
+        public string? ContractExpiryType { get; set; }
     }
 }

@@ -46,7 +46,7 @@ namespace Coinbase.Exchange.Logic.DataFeed
 
         public async ValueTask EnqueueAsync(MarketData marketData)
         {
-            if(_dataTracker.ContainsKey(marketData.Channel))
+            if(marketData.Channel != null &&_dataTracker.ContainsKey(marketData.Channel))
             {
                 var currentSequenceNumber = _dataTracker[marketData.Channel];
 

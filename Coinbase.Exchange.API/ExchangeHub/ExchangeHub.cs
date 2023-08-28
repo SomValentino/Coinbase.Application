@@ -108,5 +108,21 @@ namespace Coinbase.Exchange.API.ExchangeHub
             await _instrumentRepository.SaveChangesAsync();
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, instrument);
         }
+
+        public async Task SubscribeMultipleAsync(IEnumerable<string> instruments)
+        {
+            foreach (var instrument in instruments)
+            {
+                await SubscribeAsync(instrument);
+            }
+        }
+
+        public async Task UnSubscribeMultipleAsync(IEnumerable<string> instruments)
+        {
+            foreach(var instrument in instruments)
+            {
+                await UnSubscribeAsync(instrument);
+            }
+        }
     }
 }
