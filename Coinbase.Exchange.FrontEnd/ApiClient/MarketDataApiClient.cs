@@ -1,4 +1,5 @@
-﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+﻿using Coinbase.Exchange.SharedKernel.Models.Account;
+using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
@@ -69,7 +70,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             {
                 await AddTokenBearer();
 
-                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/instrument/client");
+                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/client/instruments");
 
                 var instruments = JsonConvert.DeserializeObject<IEnumerable<string>>(response);
 
@@ -90,11 +91,30 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             {
                 await AddTokenBearer();
 
-                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/instrument");
+                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/instruments");
 
                 var instruments = JsonConvert.DeserializeObject<Dictionary<string, Product>>(response);
 
                 return instruments;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<AccountEntry>> GetAllAccounts()
+        {
+            try
+            {
+                await AddTokenBearer();
+
+                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/accounts");
+
+                var accounts = JsonConvert.DeserializeObject<List<AccountEntry>>(response);
+
+                return accounts;
             }
             catch (Exception)
             {

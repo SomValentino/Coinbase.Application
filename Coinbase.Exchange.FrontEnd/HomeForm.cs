@@ -1,10 +1,12 @@
 using Coinbase.Exchange.FrontEnd.ApiClient;
 using Coinbase.Exchange.FrontEnd.Receivers;
+using Coinbase.Exchange.SharedKernel.Models.Account;
 using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace Coinbase.Exchange.FrontEnd
 {
@@ -15,8 +17,10 @@ namespace Coinbase.Exchange.FrontEnd
         private readonly MarketDataApiClient _marketDataApiClient;
         private List<string> _subcribed_instruments;
         private int _selected_instrumentIndex;
+        private int _selected_accountIndex;
         private Dictionary<string, Product> _all_Instruments;
         private List<string> _instruments;
+        private List<AccountEntry> _accounts;
 
         public HomeForm()
         {
@@ -25,6 +29,7 @@ namespace Coinbase.Exchange.FrontEnd
             _marketDataApiClient = new MarketDataApiClient();
             _subcribed_instruments = new List<string>();
             _selected_instrumentIndex = 0;
+            _selected_accountIndex = 0;
             _hubConnection = new HubConnectionBuilder()
                                   .WithUrl("http://127.0.0.1:5190/exchangesubscription", options =>
                                   {
@@ -124,6 +129,7 @@ namespace Coinbase.Exchange.FrontEnd
             {
                 var subscribed_instruments = await _marketDataApiClient.GetSubscribedInstruments();
                 _all_Instruments = await _marketDataApiClient.GetAllTradedInstruments();
+                _accounts = await _marketDataApiClient.GetAllAccounts();
 
                 if (subscribed_instruments.Any())
                 {
@@ -136,6 +142,13 @@ namespace Coinbase.Exchange.FrontEnd
                 {
                     _instruments = _all_Instruments.Keys.Except(subscribed_instruments).ToList();
                     listBox_instruments.DataSource = _instruments;
+                }
+                if (_accounts.Any())
+                {
+                    comboBox_accounts.DataSource = _accounts.Select(_ => _.Name).ToList();
+                    comboBox_accounts.SelectedIndex = _selected_accountIndex;
+                    label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value,CultureInfo.InvariantCulture),4)} " +
+                        $"{_accounts[_selected_accountIndex].Available_Balance.Currency}";
                 }
                 await _hubConnection.StartAsync();
             }
@@ -205,6 +218,19 @@ namespace Coinbase.Exchange.FrontEnd
 
                 throw;
             }
+        }
+
+        private void label_instruments_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox_accounts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _selected_accountIndex = comboBox_accounts.SelectedIndex;
+            label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value, CultureInfo.InvariantCulture), 4)} " +
+                        $"{_accounts[_selected_accountIndex].Available_Balance.Currency}";
+
         }
     }
 }

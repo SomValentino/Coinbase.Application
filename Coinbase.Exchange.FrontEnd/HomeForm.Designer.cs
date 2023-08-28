@@ -30,6 +30,12 @@
         {
             menuStrip1 = new MenuStrip();
             panel1 = new Panel();
+            label_balance_value = new Label();
+            label_balance = new Label();
+            label_accounts = new Label();
+            comboBox_accounts = new ComboBox();
+            label2 = new Label();
+            label1 = new Label();
             button_remove_instrument = new Button();
             button_add_instrument = new Button();
             label_add_subscription = new Label();
@@ -46,8 +52,6 @@
             label_bids = new Label();
             label_bestoffer = new Label();
             pageSetupDialog1 = new PageSetupDialog();
-            label1 = new Label();
-            label2 = new Label();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView_offers).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView_bids).BeginInit();
@@ -64,6 +68,10 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(label_balance_value);
+            panel1.Controls.Add(label_balance);
+            panel1.Controls.Add(label_accounts);
+            panel1.Controls.Add(comboBox_accounts);
             panel1.Controls.Add(label2);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(button_remove_instrument);
@@ -85,6 +93,60 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1183, 509);
             panel1.TabIndex = 1;
+            // 
+            // label_balance_value
+            // 
+            label_balance_value.AutoSize = true;
+            label_balance_value.Location = new Point(296, 104);
+            label_balance_value.Name = "label_balance_value";
+            label_balance_value.Size = new Size(13, 15);
+            label_balance_value.TabIndex = 22;
+            label_balance_value.Text = "0";
+            // 
+            // label_balance
+            // 
+            label_balance.AutoSize = true;
+            label_balance.Location = new Point(237, 104);
+            label_balance.Name = "label_balance";
+            label_balance.Size = new Size(54, 15);
+            label_balance.TabIndex = 21;
+            label_balance.Text = "Balance :";
+            // 
+            // label_accounts
+            // 
+            label_accounts.AutoSize = true;
+            label_accounts.Location = new Point(12, 101);
+            label_accounts.Name = "label_accounts";
+            label_accounts.Size = new Size(57, 15);
+            label_accounts.TabIndex = 20;
+            label_accounts.Text = "Accounts";
+            // 
+            // comboBox_accounts
+            // 
+            comboBox_accounts.FormattingEnabled = true;
+            comboBox_accounts.Location = new Point(88, 96);
+            comboBox_accounts.Name = "comboBox_accounts";
+            comboBox_accounts.Size = new Size(121, 23);
+            comboBox_accounts.TabIndex = 19;
+            comboBox_accounts.SelectedIndexChanged += comboBox_accounts_SelectedIndexChanged;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(1028, 60);
+            label2.Name = "label2";
+            label2.Size = new Size(130, 15);
+            label2.TabIndex = 18;
+            label2.Text = "subscribed instruments";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(816, 61);
+            label1.Name = "label1";
+            label1.Size = new Size(85, 15);
+            label1.TabIndex = 17;
+            label1.Text = "all instruments";
             // 
             // button_remove_instrument
             // 
@@ -156,7 +218,7 @@
             // label_price_value
             // 
             label_price_value.AutoSize = true;
-            label_price_value.Location = new Point(310, 37);
+            label_price_value.Location = new Point(282, 38);
             label_price_value.Name = "label_price_value";
             label_price_value.Size = new Size(13, 15);
             label_price_value.TabIndex = 9;
@@ -165,7 +227,7 @@
             // label_price
             // 
             label_price.AutoSize = true;
-            label_price.Location = new Point(262, 36);
+            label_price.Location = new Point(237, 38);
             label_price.Name = "label_price";
             label_price.Size = new Size(39, 15);
             label_price.TabIndex = 8;
@@ -174,16 +236,17 @@
             // label_instruments
             // 
             label_instruments.AutoSize = true;
-            label_instruments.Location = new Point(39, 35);
+            label_instruments.Location = new Point(12, 35);
             label_instruments.Name = "label_instruments";
             label_instruments.Size = new Size(70, 15);
             label_instruments.TabIndex = 7;
             label_instruments.Text = "Instruments";
+            label_instruments.Click += label_instruments_Click;
             // 
             // comboBox_instruments
             // 
             comboBox_instruments.FormattingEnabled = true;
-            comboBox_instruments.Location = new Point(115, 32);
+            comboBox_instruments.Location = new Point(88, 35);
             comboBox_instruments.Name = "comboBox_instruments";
             comboBox_instruments.Size = new Size(121, 23);
             comboBox_instruments.TabIndex = 6;
@@ -224,24 +287,6 @@
             label_bestoffer.Size = new Size(62, 15);
             label_bestoffer.TabIndex = 2;
             label_bestoffer.Text = "Best Offer:";
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(816, 61);
-            label1.Name = "label1";
-            label1.Size = new Size(85, 15);
-            label1.TabIndex = 17;
-            label1.Text = "all instruments";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(1028, 60);
-            label2.Name = "label2";
-            label2.Size = new Size(130, 15);
-            label2.TabIndex = 18;
-            label2.Text = "subscribed instruments";
             // 
             // HomeForm
             // 
@@ -286,5 +331,9 @@
         private Button button_add_instrument;
         private Label label2;
         private Label label1;
+        private ComboBox comboBox_accounts;
+        private Label label_balance;
+        private Label label_accounts;
+        private Label label_balance_value;
     }
 }

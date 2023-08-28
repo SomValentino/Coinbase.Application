@@ -11,16 +11,16 @@ namespace Coinbase.Exchange.API.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
-    public class InstrumentController : ControllerBase
+    public class ExchangeController : ControllerBase
     {
         private readonly ICoinbaseService _coinbaseService;
 
-        public InstrumentController(ICoinbaseService coinbaseService)
+        public ExchangeController(ICoinbaseService coinbaseService)
         {
             _coinbaseService = coinbaseService;
         }
 
-        [HttpGet("client")]
+        [HttpGet("client/instruments")]
         public async Task<IActionResult> GetSubcribedInstruments()
         {
             var clientId = User.Identity?.Name;
@@ -30,7 +30,7 @@ namespace Coinbase.Exchange.API.Controllers
             return Ok(instruments);
         }
 
-        [HttpGet]
+        [HttpGet("instruments")]
         public async Task<IActionResult> GetAllInstruments([FromQuery] InstrumentDto fetchAllInstrumentDto)
         {
             var product_ids = fetchAllInstrumentDto.ProductIds != null ?
@@ -61,8 +61,25 @@ namespace Coinbase.Exchange.API.Controllers
             {
                 queries.Add("offset", fetchAllInstrumentDto.Offset.ToString()!);
             }
-            var accounts_params = await _coinbaseService.GetInstrumentsAsync(queries);
-            return Ok(accounts_params.Products.Where(_ => !_.Is_Disabled).ToDictionary(_ => _.Product_Id));
+            var instruments = await _coinbaseService.GetInstrumentsAsync(queries);
+            return Ok(instruments.Products.Where(_ => !_.Is_Disabled).ToDictionary(_ => _.Product_Id));
+        }
+
+        [HttpGet("accounts")]
+        public async Task<IActionResult> GetAccounts([FromQuery] AccountDto accountDto)
+        {
+            var queries = new Dictionary<string, string>();
+            if (accountDto.Limit.HasValue)
+            {
+                queries.Add("limit", accountDto.Limit.ToString()!);
+            }
+            if (accountDto.Cursor != null)
+            {
+                queries.Add("offset", accountDto.Cursor!);
+            }
+
+            var accounts = await _coinbaseService.GetAllAccountAsync(queries);
+            return Ok(accounts!.Accounts);
         }
     }
 }
