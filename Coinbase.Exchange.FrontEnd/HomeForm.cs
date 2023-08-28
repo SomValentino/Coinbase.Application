@@ -94,7 +94,7 @@ namespace Coinbase.Exchange.FrontEnd
                     {
                         ClearDisplay();
                     });
-                    
+
                 }
             }
         }
