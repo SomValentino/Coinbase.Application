@@ -13,5 +13,6 @@ namespace Coinbase.Exchange.FrontEnd.Receivers
         public decimal Price { get; set; }
         public List<OrderBookUpdate> Bids { get; set; }
         public List<OrderBookUpdate> Offers { get; set; }
+        public List<CandleDetails> Candles { get; set; } = new();
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Coinbase.Exchange.API.BackgroundServices;
 using Coinbase.Exchange.API.Identity;
 using Coinbase.Exchange.Domain.Entities;
+using Coinbase.Exchange.Logic.Processors;
 using Coinbase.Exchange.SharedKernel.Models.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -17,6 +19,7 @@ namespace Coinbase.Exchange.API
     {
         public static void AddAPIServices(this IServiceCollection services, IConfiguration configuration)
         {
+            var serviceProvider = services.BuildServiceProvider();
             var apiConfiguration = services.BuildServiceProvider().GetRequiredService<IOptions<ApiConfiguration>>().Value;
             var logger = services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
 
@@ -94,6 +97,27 @@ namespace Coinbase.Exchange.API
                 //var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 //c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
+
+            services.AddSingleton<IEnumerable<ChannelProcessor>>(options => GetInstances<ChannelProcessor>(serviceProvider));
+        }
+
+        private static List<T> GetInstances<T>(IServiceProvider serviceProvider)
+        {
+            var instances = new List<T>();
+            var foundInstances = Assembly.GetAssembly(typeof(T))?.GetTypes()
+                                ?.Where(detector => detector.IsClass &&
+                                !detector.IsAbstract && typeof(T).IsAssignableFrom(detector));
+
+            if (foundInstances != null && foundInstances.Any())
+            {
+                foreach (var type in foundInstances)
+                {
+                    var typeDetector = (T?)serviceProvider.GetService(type);
+                    if (typeDetector != null)
+                        instances.Add(typeDetector);
+                }
+            }
+            return instances;
         }
     }
 }

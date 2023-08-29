@@ -35,6 +35,9 @@ namespace Coinbase.Exchange.FrontEnd.Receivers
                 case "Price":
                     _dataStore[instrument].Price = decimal.Parse(data,CultureInfo.InvariantCulture);
                     break;
+                case "Candles":
+                    _dataStore[instrument].Candles.AddRange(JsonConvert.DeserializeObject<List<CandleDetails>>(data));
+                    break;
             }
 
             OnMarketDataUpdate?.Invoke(this, new MarketDataEventArgs() { Store = _dataStore, Type = type });

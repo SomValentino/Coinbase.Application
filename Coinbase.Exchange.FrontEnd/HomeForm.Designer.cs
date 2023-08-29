@@ -28,8 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             menuStrip1 = new MenuStrip();
             panel1 = new Panel();
+            chart_candles = new System.Windows.Forms.DataVisualization.Charting.Chart();
             label_balance_value = new Label();
             label_balance = new Label();
             label_accounts = new Label();
@@ -52,7 +56,9 @@
             label_bids = new Label();
             label_bestoffer = new Label();
             pageSetupDialog1 = new PageSetupDialog();
+            printDialog1 = new PrintDialog();
             panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)chart_candles).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView_offers).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView_bids).BeginInit();
             SuspendLayout();
@@ -68,6 +74,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(chart_candles);
             panel1.Controls.Add(label_balance_value);
             panel1.Controls.Add(label_balance);
             panel1.Controls.Add(label_accounts);
@@ -91,8 +98,26 @@
             panel1.Controls.Add(label_bestoffer);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1183, 509);
+            panel1.Size = new Size(1564, 509);
             panel1.TabIndex = 1;
+            // 
+            // chart_candles
+            // 
+            chartArea1.Name = "ChartArea1";
+            chart_candles.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            chart_candles.Legends.Add(legend1);
+            chart_candles.Location = new Point(12, 154);
+            chart_candles.Name = "chart_candles";
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Candlestick;
+            series1.Legend = "Legend1";
+            series1.Name = "Volume";
+            series1.YValuesPerPoint = 4;
+            chart_candles.Series.Add(series1);
+            chart_candles.Size = new Size(667, 318);
+            chart_candles.TabIndex = 23;
+            chart_candles.Text = "chart1";
             // 
             // label_balance_value
             // 
@@ -133,7 +158,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(1028, 60);
+            label2.Location = new Point(1388, 42);
             label2.Name = "label2";
             label2.Size = new Size(130, 15);
             label2.TabIndex = 18;
@@ -142,7 +167,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(816, 61);
+            label1.Location = new Point(1165, 43);
             label1.Name = "label1";
             label1.Size = new Size(85, 15);
             label1.TabIndex = 17;
@@ -150,7 +175,7 @@
             // 
             // button_remove_instrument
             // 
-            button_remove_instrument.Location = new Point(953, 300);
+            button_remove_instrument.Location = new Point(1312, 299);
             button_remove_instrument.Name = "button_remove_instrument";
             button_remove_instrument.Size = new Size(53, 23);
             button_remove_instrument.TabIndex = 16;
@@ -160,7 +185,7 @@
             // 
             // button_add_instrument
             // 
-            button_add_instrument.Location = new Point(953, 251);
+            button_add_instrument.Location = new Point(1310, 251);
             button_add_instrument.Name = "button_add_instrument";
             button_add_instrument.Size = new Size(55, 28);
             button_add_instrument.TabIndex = 15;
@@ -171,17 +196,18 @@
             // label_add_subscription
             // 
             label_add_subscription.AutoSize = true;
-            label_add_subscription.Location = new Point(883, 32);
+            label_add_subscription.Location = new Point(1225, 18);
             label_add_subscription.Name = "label_add_subscription";
             label_add_subscription.Size = new Size(187, 15);
             label_add_subscription.TabIndex = 14;
             label_add_subscription.Text = "ADD INSTRUMENT SUBSCRIPTION";
+            label_add_subscription.Click += label_add_subscription_Click;
             // 
             // listBox_subscribed_instruments
             // 
             listBox_subscribed_instruments.FormattingEnabled = true;
             listBox_subscribed_instruments.ItemHeight = 15;
-            listBox_subscribed_instruments.Location = new Point(1028, 78);
+            listBox_subscribed_instruments.Location = new Point(1388, 60);
             listBox_subscribed_instruments.Name = "listBox_subscribed_instruments";
             listBox_subscribed_instruments.SelectionMode = SelectionMode.MultiSimple;
             listBox_subscribed_instruments.Size = new Size(120, 394);
@@ -191,7 +217,7 @@
             // 
             listBox_instruments.FormattingEnabled = true;
             listBox_instruments.ItemHeight = 15;
-            listBox_instruments.Location = new Point(816, 79);
+            listBox_instruments.Location = new Point(1165, 61);
             listBox_instruments.Name = "listBox_instruments";
             listBox_instruments.SelectionMode = SelectionMode.MultiSimple;
             listBox_instruments.Size = new Size(120, 394);
@@ -200,7 +226,7 @@
             // dataGridView_offers
             // 
             dataGridView_offers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView_offers.Location = new Point(427, 299);
+            dataGridView_offers.Location = new Point(713, 299);
             dataGridView_offers.Name = "dataGridView_offers";
             dataGridView_offers.RowTemplate.Height = 25;
             dataGridView_offers.Size = new Size(348, 173);
@@ -209,7 +235,7 @@
             // dataGridView_bids
             // 
             dataGridView_bids.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView_bids.Location = new Point(427, 78);
+            dataGridView_bids.Location = new Point(713, 61);
             dataGridView_bids.Name = "dataGridView_bids";
             dataGridView_bids.RowTemplate.Height = 25;
             dataGridView_bids.Size = new Size(348, 163);
@@ -255,7 +281,7 @@
             // label_bestoffer_value
             // 
             label_bestoffer_value.AutoSize = true;
-            label_bestoffer_value.Location = new Point(490, 264);
+            label_bestoffer_value.Location = new Point(781, 264);
             label_bestoffer_value.Name = "label_bestoffer_value";
             label_bestoffer_value.Size = new Size(13, 15);
             label_bestoffer_value.TabIndex = 5;
@@ -264,7 +290,7 @@
             // label_bestbid_value
             // 
             label_bestbid_value.AutoSize = true;
-            label_bestbid_value.Location = new Point(490, 36);
+            label_bestbid_value.Location = new Point(776, 35);
             label_bestbid_value.Name = "label_bestbid_value";
             label_bestbid_value.Size = new Size(13, 15);
             label_bestbid_value.TabIndex = 4;
@@ -273,7 +299,7 @@
             // label_bids
             // 
             label_bids.AutoSize = true;
-            label_bids.Location = new Point(427, 35);
+            label_bids.Location = new Point(713, 35);
             label_bids.Name = "label_bids";
             label_bids.Size = new Size(57, 15);
             label_bids.TabIndex = 3;
@@ -282,17 +308,21 @@
             // label_bestoffer
             // 
             label_bestoffer.AutoSize = true;
-            label_bestoffer.Location = new Point(427, 264);
+            label_bestoffer.Location = new Point(713, 264);
             label_bestoffer.Name = "label_bestoffer";
             label_bestoffer.Size = new Size(62, 15);
             label_bestoffer.TabIndex = 2;
             label_bestoffer.Text = "Best Offer:";
             // 
+            // printDialog1
+            // 
+            printDialog1.UseEXDialog = true;
+            // 
             // HomeForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1180, 509);
+            ClientSize = new Size(1563, 509);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -301,6 +331,7 @@
             Load += HomeForm_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)chart_candles).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView_offers).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView_bids).EndInit();
             ResumeLayout(false);
@@ -335,5 +366,7 @@
         private Label label_balance;
         private Label label_accounts;
         private Label label_balance_value;
+        private PrintDialog printDialog1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart_candles;
     }
 }

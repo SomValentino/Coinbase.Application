@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Coinbase.Exchange.Logic\Coinbase.Exchange.Logic.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

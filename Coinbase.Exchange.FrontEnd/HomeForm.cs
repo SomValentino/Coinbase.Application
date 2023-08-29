@@ -3,6 +3,7 @@ using Coinbase.Exchange.FrontEnd.Receivers;
 using Coinbase.Exchange.SharedKernel.Models.Account;
 using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Products;
+using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ namespace Coinbase.Exchange.FrontEnd
         private Dictionary<string, Product> _all_Instruments;
         private List<string> _instruments;
         private List<AccountEntry> _accounts;
+        private List<CandleDetails> _candles;
 
         public HomeForm()
         {
@@ -30,6 +32,7 @@ namespace Coinbase.Exchange.FrontEnd
             _subcribed_instruments = new List<string>();
             _selected_instrumentIndex = 0;
             _selected_accountIndex = 0;
+            _candles = new List<CandleDetails>();
             _hubConnection = new HubConnectionBuilder()
                                   .WithUrl("http://127.0.0.1:5190/exchangesubscription", options =>
                                   {
@@ -56,6 +59,7 @@ namespace Coinbase.Exchange.FrontEnd
                     var bids = store[selected_instrument].Bids;
                     var offers = store[selected_instrument].Offers;
                     var price = store[selected_instrument].Price;
+                    var candles = store[selected_instrument].Candles;
 
                     label_price_value.Invoke(() =>
                     {
@@ -89,6 +93,15 @@ namespace Coinbase.Exchange.FrontEnd
                             label_bestoffer_value.Text = bestOffer;
                             dataGridView_offers.AutoGenerateColumns = true;
                             dataGridView_offers.DataSource = source;
+                        });
+                    }
+
+                    if (candles != null && candles.Any())
+                    {
+                        _candles = candles.Skip(Math.Max(0, candles.Count - 100)).ToList();
+                        chart_candles.Invoke(() =>
+                        {
+                            Load_Candle_Stick_data();
                         });
                     }
 
@@ -147,10 +160,12 @@ namespace Coinbase.Exchange.FrontEnd
                 {
                     comboBox_accounts.DataSource = _accounts.Select(_ => _.Name).ToList();
                     comboBox_accounts.SelectedIndex = _selected_accountIndex;
-                    label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value,CultureInfo.InvariantCulture),4)} " +
+                    label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value, CultureInfo.InvariantCulture), 4)} " +
                         $"{_accounts[_selected_accountIndex].Available_Balance.Currency}";
                 }
                 await _hubConnection.StartAsync();
+
+                Load_Candle_Stick_data();
             }
             catch (Exception ex)
             {
@@ -230,6 +245,32 @@ namespace Coinbase.Exchange.FrontEnd
             _selected_accountIndex = comboBox_accounts.SelectedIndex;
             label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value, CultureInfo.InvariantCulture), 4)} " +
                         $"{_accounts[_selected_accountIndex].Available_Balance.Currency}";
+
+        }
+
+        private void Load_Candle_Stick_data()
+        {
+            if (_candles.Any())
+            {
+                chart_candles.ChartAreas["ChartArea1"].AxisX.MajorGrid.LineWidth = 0;
+                chart_candles.ChartAreas["ChartArea1"].AxisY.MajorGrid.LineWidth = 0;
+
+                chart_candles.Series["Volume"].XValueMember = "Date";
+                chart_candles.Series["Volume"].YValueMembers = "High,Low,Open,Close";
+                chart_candles.Series["Volume"].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+                chart_candles.Series["Volume"].CustomProperties = "PriceDownColor=Red,PriceUpColor=Green";
+                chart_candles.DataManipulator.IsStartFromFirst = true;
+                var source = new BindingSource();
+                source.DataSource = _candles;
+
+                chart_candles.DataSource = source;
+                chart_candles.DataBind();
+
+            }
+        }
+
+        private void label_add_subscription_Click(object sender, EventArgs e)
+        {
 
         }
     }
