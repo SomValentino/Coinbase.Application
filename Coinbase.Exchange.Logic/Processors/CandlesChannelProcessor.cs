@@ -21,10 +21,10 @@ namespace Coinbase.Exchange.Logic.Processors
             var candleDetails = candleData!.Events.SelectMany(_ => _.Candles);
 
             candleDetails = candleDetails.Select(_ =>
-                            {
-                                _.Date = candleData!.Timestamp;
-                                return _;
-                            });
+                    {
+                        _.Date = candleData!.Timestamp.Date;
+                        return _;
+                    });
 
             if(candleDetails.Any() )
             {

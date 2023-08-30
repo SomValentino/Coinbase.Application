@@ -1,6 +1,7 @@
 using Coinbase.Exchange.FrontEnd.ApiClient;
 using Coinbase.Exchange.FrontEnd.Receivers;
 using Coinbase.Exchange.SharedKernel.Models.Account;
+using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Coinbase.Exchange.FrontEnd
 {
@@ -24,11 +26,12 @@ namespace Coinbase.Exchange.FrontEnd
         private List<AccountEntry> _accounts;
         private List<CandleDetails> _candles;
 
-        public HomeForm()
+        public HomeForm(MarketTraderReceiver marketTraderReceiver,
+            MarketDataApiClient marketDataApiClient)
         {
             InitializeComponent();
-            _marketDataReceiver = new MarketTraderReceiver();
-            _marketDataApiClient = new MarketDataApiClient();
+            _marketDataReceiver = marketTraderReceiver;
+            _marketDataApiClient = marketDataApiClient;
             _subcribed_instruments = new List<string>();
             _selected_instrumentIndex = 0;
             _selected_accountIndex = 0;
@@ -43,7 +46,7 @@ namespace Coinbase.Exchange.FrontEnd
                                   .Build();
 
             _hubConnection.Closed += HubConnection_Closed;
-            MarketTraderReceiver.OnMarketDataUpdate += MarketTraderReceiver_OnMarketDataUpdate;
+            DataReceiver.OnMarketDataUpdate += MarketTraderReceiver_OnMarketDataUpdate;
         }
 
         private void MarketTraderReceiver_OnMarketDataUpdate(object? sender, MarketDataEventArgs e)
@@ -60,51 +63,10 @@ namespace Coinbase.Exchange.FrontEnd
                     var offers = store[selected_instrument].Offers;
                     var price = store[selected_instrument].Price;
                     var candles = store[selected_instrument].Candles;
-
-                    label_price_value.Invoke(() =>
-                    {
-                        label_price_value.Refresh();
-                        label_price_value.Text = price.ToString();
-                    });
-
-                    if (bids != null && bids.Any())
-                    {
-                        var bestbid = bids[0].Price.ToString();
-                        var source = new BindingSource();
-                        source.DataSource = bids;
-                        label_bestbid_value.Invoke(() =>
-                        {
-                            label_bestbid_value.Refresh();
-                            label_bestbid_value.Text = bestbid;
-                            dataGridView_bids.AutoGenerateColumns = true;
-                            dataGridView_bids.DataSource = source;
-                        });
-                    }
-
-
-                    if (offers != null && offers.Any())
-                    {
-                        var bestOffer = offers[0].Price.ToString();
-                        var source = new BindingSource();
-                        source.DataSource = offers;
-                        label_bestoffer_value.Invoke(() =>
-                        {
-                            label_bestoffer_value.Refresh();
-                            label_bestoffer_value.Text = bestOffer;
-                            dataGridView_offers.AutoGenerateColumns = true;
-                            dataGridView_offers.DataSource = source;
-                        });
-                    }
-
-                    if (candles != null && candles.Any())
-                    {
-                        _candles = candles.Skip(Math.Max(0, candles.Count - 100)).ToList();
-                        chart_candles.Invoke(() =>
-                        {
-                            Load_Candle_Stick_data();
-                        });
-                    }
-
+                    UpdatePriceData(price);
+                    UpdateBidsData(bids);
+                    UpdateOffersData(offers);
+                    UpdateCandleChartData(candles);
                 }
                 else
                 {
@@ -117,6 +79,61 @@ namespace Coinbase.Exchange.FrontEnd
             }
         }
 
+        private void UpdateCandleChartData(List<CandleDetails> candles)
+        {
+            if (candles != null && candles.Any())
+            {
+                _candles = candles;
+                chart_candles.Invoke(() =>
+                {
+                    Load_Candle_Stick_data();
+                });
+            }
+        }
+
+        private void UpdateOffersData(List<OrderBookUpdate> offers)
+        {
+            if (offers != null && offers.Any())
+            {
+                var bestOffer = offers[0].Price.ToString();
+                var source = new BindingSource();
+                source.DataSource = offers;
+                label_bestoffer_value.Invoke(() =>
+                {
+                    label_bestoffer_value.Refresh();
+                    label_bestoffer_value.Text = bestOffer;
+                    dataGridView_offers.AutoGenerateColumns = true;
+                    dataGridView_offers.DataSource = source;
+                });
+            }
+        }
+
+        private void UpdateBidsData(List<OrderBookUpdate> bids)
+        {
+            if (bids != null && bids.Any())
+            {
+                var bestbid = bids[0].Price.ToString();
+                var source = new BindingSource();
+                source.DataSource = bids;
+                label_bestbid_value.Invoke(() =>
+                {
+                    label_bestbid_value.Refresh();
+                    label_bestbid_value.Text = bestbid;
+                    dataGridView_bids.AutoGenerateColumns = true;
+                    dataGridView_bids.DataSource = source;
+                });
+            }
+        }
+
+        private void UpdatePriceData(decimal price)
+        {
+            label_price_value.Invoke(() =>
+            {
+                label_price_value.Refresh();
+                label_price_value.Text = price.ToString();
+            });
+        }
+
         private async Task HubConnection_Closed(Exception? exception)
         {
             await Task.Delay(new Random().Next(0, 5) * 1000);
@@ -126,8 +143,7 @@ namespace Coinbase.Exchange.FrontEnd
             }
             catch (Exception ex)
             {
-
-                throw;
+                MessageBox.Show("Error connecting to SignalR hub", "Connection Error", MessageBoxButtons.OK);
             }
         }
 
@@ -169,7 +185,7 @@ namespace Coinbase.Exchange.FrontEnd
             }
             catch (Exception ex)
             {
-
+                MessageBox.Show("Error connecting to SignalR hub", "Connection Error", MessageBoxButtons.OK);
                 await HubConnection_Closed(ex);
             }
         }
@@ -187,13 +203,17 @@ namespace Coinbase.Exchange.FrontEnd
             label_price_value.Text = string.Empty;
             dataGridView_bids.DataSource = default;
             dataGridView_offers.DataSource = default;
+            foreach (var series in chart_candles.Series)
+            {
+                series.Points.Clear();
+            };
         }
 
         private async void button_add_instrument_Click(object sender, EventArgs e)
         {
             try
             {
-                var instruments = listBox_instruments.SelectedItems.Cast<string>();
+                var instruments = listBox_instruments.SelectedItems.Cast<string>().ToList();
 
                 await _hubConnection.InvokeAsync("SubscribeMultipleAsync", instruments);
 
@@ -204,11 +224,14 @@ namespace Coinbase.Exchange.FrontEnd
                 comboBox_instruments.DataSource = _subcribed_instruments;
                 listBox_instruments.DataSource = _instruments;
                 listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
+
+                MessageBox.Show($"Successfully subscribed to the following: {string.Join(",", instruments)} feed",
+                   "Instrument Subscription", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception)
             {
 
-                throw;
+                MessageBox.Show("Error subscribing to instrument feed", "Subscription Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -216,7 +239,7 @@ namespace Coinbase.Exchange.FrontEnd
         {
             try
             {
-                var instruments = listBox_subscribed_instruments.SelectedItems.Cast<string>();
+                var instruments = listBox_subscribed_instruments.SelectedItems.Cast<string>().ToList();
 
                 await _hubConnection.InvokeAsync("UnSubscribeMultipleAsync", instruments);
 
@@ -227,11 +250,13 @@ namespace Coinbase.Exchange.FrontEnd
                 listBox_instruments.DataSource = _instruments;
                 listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
                 _selected_instrumentIndex = 0;
+
+                MessageBox.Show($"Successfully unsubscribed to the following: {string.Join(",",instruments)} feed",
+                    "Instrument Subscription", MessageBoxButtons.OK,MessageBoxIcon.Information);
             }
             catch (Exception)
             {
-
-                throw;
+                MessageBox.Show("Error subscribing to instrument feed", "Subscription Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
         }
 
@@ -257,7 +282,7 @@ namespace Coinbase.Exchange.FrontEnd
 
                 chart_candles.Series["Volume"].XValueMember = "Date";
                 chart_candles.Series["Volume"].YValueMembers = "High,Low,Open,Close";
-                chart_candles.Series["Volume"].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+                chart_candles.Series["Volume"].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Date;
                 chart_candles.Series["Volume"].CustomProperties = "PriceDownColor=Red,PriceUpColor=Green";
                 chart_candles.DataManipulator.IsStartFromFirst = true;
                 var source = new BindingSource();

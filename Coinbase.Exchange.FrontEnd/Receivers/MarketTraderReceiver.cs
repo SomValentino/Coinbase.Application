@@ -1,4 +1,6 @@
-﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+﻿using Ardalis.GuardClauses;
+using Coinbase.Exchange.FrontEnd.Factory;
+using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Newtonsoft.Json;
 using System;
@@ -12,35 +14,19 @@ namespace Coinbase.Exchange.FrontEnd.Receivers
 {
     public class MarketTraderReceiver
     {
-        private static Dictionary<string, MarketData> _dataStore = new Dictionary<string, MarketData>();
+        private readonly IReceiverFactory _receiverFactory;
 
-        public static event EventHandler<MarketDataEventArgs>? OnMarketDataUpdate;
-
-
+        public MarketTraderReceiver(IReceiverFactory receiverFactory)
+        {
+            _receiverFactory = Guard.Against.Null(receiverFactory,nameof(receiverFactory));
+        }
         public void OnReceiveOrderBookMarketData(string instrument, string type, string data)
         {
-            if(!_dataStore.ContainsKey(instrument))
-            {
-                _dataStore.Add(instrument, new MarketData());
-            }
+            var receiver = _receiverFactory.GetDataReceiver(type);
 
-            switch (type)
-            {
-                case "Offers":
-                    _dataStore[instrument].Offers = JsonConvert.DeserializeObject<List<OrderBookUpdate>>(data);
-                    break;
-                case "Bids":
-                    _dataStore[instrument].Bids = JsonConvert.DeserializeObject<List<OrderBookUpdate>>(data);
-                    break;
-                case "Price":
-                    _dataStore[instrument].Price = decimal.Parse(data,CultureInfo.InvariantCulture);
-                    break;
-                case "Candles":
-                    _dataStore[instrument].Candles.AddRange(JsonConvert.DeserializeObject<List<CandleDetails>>(data));
-                    break;
-            }
+            Guard.Against.Null(receiver, nameof(receiver));
 
-            OnMarketDataUpdate?.Invoke(this, new MarketDataEventArgs() { Store = _dataStore, Type = type });
+            receiver.ReceiveMarketData(instrument, data);
         }
     }
 }
