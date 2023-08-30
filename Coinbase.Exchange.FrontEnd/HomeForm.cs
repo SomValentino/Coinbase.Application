@@ -143,7 +143,7 @@ namespace Coinbase.Exchange.FrontEnd
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error connecting to SignalR hub", "Connection Error", MessageBoxButtons.OK);
+                MessageBox.Show("Error connecting to SignalR hub", "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

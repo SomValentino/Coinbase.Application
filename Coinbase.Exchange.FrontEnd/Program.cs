@@ -1,6 +1,8 @@
 using Coinbase.Exchange.FrontEnd.ApiClient;
+using Coinbase.Exchange.FrontEnd.Config;
 using Coinbase.Exchange.FrontEnd.Factory;
 using Coinbase.Exchange.FrontEnd.Receivers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -20,11 +22,16 @@ namespace Coinbase.Exchange.FrontEnd
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            var builder = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            Configuration = builder.Build();
             var host = CreateHostBuilder().Build();
             var serviceProvider = host.Services;
             
             Application.Run(serviceProvider.GetRequiredService<HomeForm>());
         }
+
+        public static IConfiguration Configuration;
 
         static IHostBuilder CreateHostBuilder()
         {
@@ -40,6 +47,10 @@ namespace Coinbase.Exchange.FrontEnd
                     services.AddTransient<IReceiverFactory, ReceiverFactory>();
                     
                     services.AddTransient<HomeForm>();
+
+                    services.Configure<Setting>(Configuration.GetSection("AppSettings"));
+
+                    
 
                     var serviceProvider = services.BuildServiceProvider();
 

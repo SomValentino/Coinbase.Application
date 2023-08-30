@@ -12,6 +12,7 @@
     <PackageReference Include="Ardalis.GuardClauses" Version="4.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.10" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="WinForms.DataVisualization" Version="1.8.0" />
@@ -19,6 +20,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coinbase.Exchange.SharedKernel\Coinbase.Exchange.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

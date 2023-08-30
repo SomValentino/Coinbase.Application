@@ -1,7 +1,9 @@
-﻿using Coinbase.Exchange.SharedKernel.Models.Account;
+﻿using Coinbase.Exchange.FrontEnd.Config;
+using Coinbase.Exchange.SharedKernel.Models.Account;
 using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -16,11 +18,14 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
     public class MarketDataApiClient
     {
         private readonly MemoryCache _cache;
+        private readonly Setting _setting;
         private HttpClient _client;
 
-        public MarketDataApiClient()
+        public MarketDataApiClient(IOptions<Setting> settingOptions)
         {
+            _setting = settingOptions.Value;
             _client = new HttpClient();
+            _client.BaseAddress = new Uri(_setting.BaseUrl);
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var cachingOptions = Microsoft.Extensions.Options.Options.Create(new MemoryCacheOptions
             {
@@ -46,7 +51,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
                 });
 
                 var content = new StringContent(data, Encoding.UTF8, "application/json");
-                var response = await _client.PostAsync("http://127.0.0.1:5190/api/auth", content);
+                var response = await _client.PostAsync("/api/auth", content);
 
                 response.EnsureSuccessStatusCode();
 
@@ -70,7 +75,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             {
                 await AddTokenBearer();
 
-                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/client/instruments");
+                var response = await _client.GetStringAsync("/api/exchange/client/instruments");
 
                 var instruments = JsonConvert.DeserializeObject<IEnumerable<string>>(response);
 
@@ -91,7 +96,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             {
                 await AddTokenBearer();
 
-                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/instruments");
+                var response = await _client.GetStringAsync("/api/exchange/instruments");
 
                 var instruments = JsonConvert.DeserializeObject<Dictionary<string, Product>>(response);
 
@@ -110,7 +115,7 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             {
                 await AddTokenBearer();
 
-                var response = await _client.GetStringAsync("http://127.0.0.1:5190/api/exchange/accounts");
+                var response = await _client.GetStringAsync("/api/exchange/accounts");
 
                 var accounts = JsonConvert.DeserializeObject<List<AccountEntry>>(response);
 
