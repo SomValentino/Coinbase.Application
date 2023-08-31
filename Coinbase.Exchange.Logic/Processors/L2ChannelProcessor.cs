@@ -1,4 +1,5 @@
-﻿using Coinbase.Exchange.SharedKernel.Models.ApiDto;
+﻿using Coinbase.Exchange.SharedKernel.Constants;
+using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Newtonsoft.Json;
 using System;
@@ -12,7 +13,7 @@ namespace Coinbase.Exchange.Logic.Processors
 {
     public class L2ChannelProcessor : ChannelProcessor
     {
-        public override string Channel => "l2_data";
+        public override string Channel => Channels.L2_Data;
 
         public override IEnumerable<MarketDataResult> Process(string message)
         {
@@ -24,9 +25,9 @@ namespace Coinbase.Exchange.Logic.Processors
             var orderUpdates = orderBook!.Events
                 .SelectMany(_ => _.Updates);
 
-            var bids = orderUpdates.Where(_ => _.Side == "bid");
+            var bids = orderUpdates.Where(_ => _.Side == MessageType.Bid);
 
-            var offers = orderUpdates.Where(_ => _.Side == "offer");
+            var offers = orderUpdates.Where(_ => _.Side == MessageType.Offer);
 
             if (bids.Any())
             {
@@ -38,7 +39,7 @@ namespace Coinbase.Exchange.Logic.Processors
                     EventTime = _.EventTime
                 }));
 
-                result.Add(new MarketDataResult { Type = "Bids", Data = serialized_bids, Instrument = product_Id });
+                result.Add(new MarketDataResult { Type = MessageType.Bids, Data = serialized_bids, Instrument = product_Id });
             }
 
             if (offers.Any())
@@ -50,7 +51,7 @@ namespace Coinbase.Exchange.Logic.Processors
                     EventTime = _.EventTime
                 }));
 
-                result.Add(new MarketDataResult { Type = "Offers", Data = serialized_offers, Instrument = product_Id });
+                result.Add(new MarketDataResult { Type = MessageType.Offers, Data = serialized_offers, Instrument = product_Id });
             }
 
             return result;

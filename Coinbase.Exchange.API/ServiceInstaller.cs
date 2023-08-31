@@ -1,14 +1,17 @@
-﻿using Coinbase.Exchange.API.BackgroundServices;
+﻿using Coinbase.Client.Websocket.Responses;
+using Coinbase.Exchange.API.BackgroundServices;
 using Coinbase.Exchange.API.Identity;
 using Coinbase.Exchange.Domain.Entities;
 using Coinbase.Exchange.Logic.Processors;
 using Coinbase.Exchange.SharedKernel.Models.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -99,6 +102,23 @@ namespace Coinbase.Exchange.API
             });
 
             services.AddSingleton<IEnumerable<ChannelProcessor>>(options => GetInstances<ChannelProcessor>(serviceProvider));
+        }
+
+        public static void UseException(this WebApplication app)
+        {
+            var logger = app.Services.GetService<ILogger<WebApplication>>();
+            app.UseExceptionHandler(option => {
+                option.Run(async context => {
+                    context.Response.ContentType = "application/json";
+                    var exception = context.Features.Get<IExceptionHandlerPathFeature>();
+                    logger?.LogError(exception?.Error.ToString());
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                    {
+                        StatusCode = System.Net.HttpStatusCode.InternalServerError,
+                        ErrorMessage = "An Error occurred while processing your request. Kindly try again later"
+                    }));
+                });
+            });
         }
 
         private static List<T> GetInstances<T>(IServiceProvider serviceProvider)

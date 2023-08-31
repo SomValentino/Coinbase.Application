@@ -149,7 +149,7 @@ namespace Coinbase.Exchange.FrontEnd
 
         private async void HomeForm_Load(object sender, EventArgs e)
         {
-            _hubConnection.On<string, string, string>("receiveOrderBookUpdate", (instrument, type, data) =>
+            _hubConnection.On<string, string, string>("MarketDataResultUpdate", (instrument, type, data) =>
             {
                 _marketDataReceiver.OnReceiveOrderBookMarketData(instrument, type, data);
             });
@@ -185,7 +185,7 @@ namespace Coinbase.Exchange.FrontEnd
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error connecting to SignalR hub", "Connection Error", MessageBoxButtons.OK);
+                MessageBox.Show("Error connecting to Market Data Server Feed", "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 await HubConnection_Closed(ex);
             }
         }

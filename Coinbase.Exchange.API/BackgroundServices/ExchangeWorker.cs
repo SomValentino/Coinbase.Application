@@ -1,4 +1,6 @@
-﻿using Coinbase.Exchange.Logic.DataFeed;
+﻿using Ardalis.GuardClauses;
+using Coinbase.Exchange.API.Extensions;
+using Coinbase.Exchange.Logic.DataFeed;
 using Coinbase.Exchange.Logic.Factory;
 using Coinbase.Exchange.SharedKernel.Models.ApiDto;
 using Coinbase.Exchange.SharedKernel.Models.Bids;
@@ -21,9 +23,9 @@ namespace Coinbase.Exchange.API.BackgroundServices
             IProcessorFactory processorFactory,
             ILogger<ExchangeWorker> logger)
         {
-            _marketDataQueue = marketDataQueue;
-            _hubContext = hubContext;
-            _processorFactory = processorFactory;
+            _marketDataQueue = Guard.Against.Null(marketDataQueue, nameof(marketDataQueue));
+            _hubContext = Guard.Against.Null(hubContext,nameof(hubContext));
+            _processorFactory = Guard.Against.Null(processorFactory, nameof(processorFactory));
             _logger = logger;
         }
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -40,8 +42,7 @@ namespace Coinbase.Exchange.API.BackgroundServices
                 {
                     var channelProcessor = _processorFactory.GetProcessor(marketData.Channel);
 
-                    if (channelProcessor == null) 
-                        throw new ArgumentNullException("No processor found");
+                    Guard.Against.Null(Guard.Against.Null(channelProcessor, nameof(channelProcessor)), "Channel Processor not found");
 
                     var results = channelProcessor.Process(marketData.Data);
 
@@ -52,7 +53,7 @@ namespace Coinbase.Exchange.API.BackgroundServices
                 }
                 catch (Exception ex)
                 {
-
+                    _logger.LogError(ex, ex.Message);
                     throw;
                 }
             }

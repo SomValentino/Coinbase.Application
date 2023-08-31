@@ -5,13 +5,8 @@ using Coinbase.Exchange.SharedKernel.Models.Products;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Coinbase.Exchange.FrontEnd.ApiClient
 {
@@ -46,8 +41,8 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
 
                 var data = JsonConvert.SerializeObject(new AuthRequest
                 {
-                    ClientId = "58e3db40ac3646699669836ae43516fb",
-                    ClientName = "test"
+                    ClientId = _setting.ClientId,
+                    ClientName = _setting.ClientName
                 });
 
                 var content = new StringContent(data, Encoding.UTF8, "application/json");

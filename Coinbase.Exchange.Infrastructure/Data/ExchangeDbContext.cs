@@ -18,7 +18,6 @@ namespace Coinbase.Exchange.Infrastructure.Data
 
         public DbSet<Domain.Entities.Client> Clients => Set<Domain.Entities.Client>();
         public DbSet<Domain.Entities.Instrument> productGroups => Set<Instrument>();
-        public DbSet<Setting> Settings => Set<Setting>();
         public DbSet<ClientRegistration> ClientRegistrations => Set<ClientRegistration>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

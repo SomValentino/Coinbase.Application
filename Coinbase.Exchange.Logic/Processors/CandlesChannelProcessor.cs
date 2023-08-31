@@ -1,4 +1,5 @@
-﻿using Coinbase.Exchange.SharedKernel.Models.Subscription;
+﻿using Coinbase.Exchange.SharedKernel.Constants;
+using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Coinbase.Exchange.Logic.Processors
 {
     public class CandlesChannelProcessor : ChannelProcessor
     {
-        public override string Channel => "candles";
+        public override string Channel => Channels.Candles;
 
         public override IEnumerable<MarketDataResult> Process(string message)
         {
@@ -32,7 +33,7 @@ namespace Coinbase.Exchange.Logic.Processors
 
                 var instrument = candleDetails.First().product_id;
 
-                result.Add(new MarketDataResult { Data = serialized_candles, Instrument = instrument, Type = "Candles" });
+                result.Add(new MarketDataResult { Data = serialized_candles, Instrument = instrument, Type = MessageType.Candles });
             }
 
             return result;
