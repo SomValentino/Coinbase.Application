@@ -123,6 +123,25 @@ namespace Coinbase.Exchange.FrontEnd.ApiClient
             }
         }
 
+        public async Task<AccountEntry> GetAccounts(string accountId)
+        {
+            try
+            {
+                await AddTokenBearer();
+
+                var response = await _client.GetStringAsync($"/api/exchange/account/{accountId}");
+
+                var account = JsonConvert.DeserializeObject<AccountEntry>(response);
+
+                return account;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
 
         private async Task AddTokenBearer()
         {

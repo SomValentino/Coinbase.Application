@@ -9,7 +9,7 @@ namespace Coinbase.Exchange.Logic.Services
     {
         Task<Instrument?> GetInstrumentsAsync(Dictionary<string,string> queries);
         Task<Account?> GetAllAccountAsync(Dictionary<string, string> queries);
-        Task<AccountEntry?> GetAccountEntryAsync(string uuid);
+        Task<AccountBalance?> GetAccountEntryAsync(string uuid);
 
         Task<Orders?> GetOrdersAsync(Dictionary<string, string> queries );
         Task<BestBids?> GetBestBidAsk(string product_ids);

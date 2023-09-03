@@ -43,6 +43,7 @@ namespace Coinbase.Exchange.FrontEnd
                                       options.AccessTokenProvider = _marketDataApiClient.GetAccessToken;
                                       options.SkipNegotiation = true;
                                   })
+                                  .WithAutomaticReconnect()
                                   .Build();
 
             _hubConnection.Closed += HubConnection_Closed;
@@ -203,6 +204,11 @@ namespace Coinbase.Exchange.FrontEnd
             label_price_value.Text = string.Empty;
             dataGridView_bids.DataSource = default;
             dataGridView_offers.DataSource = default;
+            ClearChart();
+        }
+
+        private void ClearChart()
+        {
             foreach (var series in chart_candles.Series)
             {
                 series.Points.Clear();
@@ -251,12 +257,12 @@ namespace Coinbase.Exchange.FrontEnd
                 listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
                 _selected_instrumentIndex = 0;
 
-                MessageBox.Show($"Successfully unsubscribed to the following: {string.Join(",",instruments)} feed",
-                    "Instrument Subscription", MessageBoxButtons.OK,MessageBoxIcon.Information);
+                MessageBox.Show($"Successfully unsubscribed to the following: {string.Join(",", instruments)} feed",
+                    "Instrument Subscription", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception)
             {
-                MessageBox.Show("Error subscribing to instrument feed", "Subscription Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("Error subscribing to instrument feed", "Subscription Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -265,9 +271,18 @@ namespace Coinbase.Exchange.FrontEnd
 
         }
 
-        private void comboBox_accounts_SelectedIndexChanged(object sender, EventArgs e)
+        private async void comboBox_accounts_SelectedIndexChanged(object sender, EventArgs e)
         {
             _selected_accountIndex = comboBox_accounts.SelectedIndex;
+            
+
+            var balance = await _marketDataApiClient.GetAccounts(_accounts[_selected_accountIndex].Uuid);
+
+            if(balance != null)
+            {
+                _accounts[_selected_accountIndex] = balance;
+                
+            }
             label_balance_value.Text = $"{Math.Round(decimal.Parse(_accounts[_selected_accountIndex].Available_Balance.Value, CultureInfo.InvariantCulture), 4)} " +
                         $"{_accounts[_selected_accountIndex].Available_Balance.Currency}";
 
@@ -277,14 +292,36 @@ namespace Coinbase.Exchange.FrontEnd
         {
             if (_candles.Any())
             {
+                ClearChart();
+                chart_candles.Titles.Clear();
                 chart_candles.ChartAreas["ChartArea1"].AxisX.MajorGrid.LineWidth = 0;
                 chart_candles.ChartAreas["ChartArea1"].AxisY.MajorGrid.LineWidth = 0;
 
-                chart_candles.Series["Volume"].XValueMember = "Date";
-                chart_candles.Series["Volume"].YValueMembers = "High,Low,Open,Close";
-                chart_candles.Series["Volume"].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Date;
+                var min = _candles.Min(_ => _.Low);
+                var max = _candles.Max(_ => _.High);
+
+                var range = (max - min) / 2;
+
+                var interval = (max - min) / 4;
+
+                var candle = _candles.Last();
+
+                var label = $"O{candle.Open} H{candle.High} L{candle.Low} C{candle.Close} V{candle.Volume}";
+
+                chart_candles.Series["Volume"].XValueMember = "Time";
+                chart_candles.Series["Volume"].YValueMembers = "Open,High,Low,Close";
+                chart_candles.Series["Volume"].ChartType = SeriesChartType.Candlestick;
+                chart_candles.Series["Volume"]["PointWidth"] = "0.2";
+                chart_candles.ChartAreas[0].AxisX.Interval = 20d;
+                chart_candles.ChartAreas[0].AxisY.Interval = (double)(interval);
+                chart_candles.ChartAreas[0].AxisY.Maximum = (double)(max + range);
+                chart_candles.ChartAreas[0].AxisY.Minimum = (double)(min - range);
+                chart_candles.Series["Volume"].XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
                 chart_candles.Series["Volume"].CustomProperties = "PriceDownColor=Red,PriceUpColor=Green";
+                chart_candles.Series["Volume"]["ShowOpenClose"] = "Both";
+                chart_candles.Titles.Add(label);
                 chart_candles.DataManipulator.IsStartFromFirst = true;
+                chart_candles.DataSource = default;
                 var source = new BindingSource();
                 source.DataSource = _candles;
 
@@ -295,6 +332,11 @@ namespace Coinbase.Exchange.FrontEnd
         }
 
         private void label_add_subscription_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chart_candles_Click(object sender, EventArgs e)
         {
 
         }

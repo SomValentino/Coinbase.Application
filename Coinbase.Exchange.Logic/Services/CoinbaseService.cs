@@ -53,12 +53,12 @@ namespace Coinbase.Exchange.Logic.Services
             await _instrumentRepository.SaveChangesAsync();
         }
 
-        public async Task<AccountEntry?> GetAccountEntryAsync(string uuid)
+        public async Task<AccountBalance?> GetAccountEntryAsync(string uuid)
         {
             var account = await _requestBuilder
                                         .AddResource(Resources.ACCOUNTS)
                                         .AddResource(uuid)
-                                        .GetAsync<AccountEntry>();
+                                        .GetAsync<AccountBalance>();
             return account;
         }
 

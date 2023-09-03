@@ -1,4 +1,6 @@
-﻿namespace Coinbase.Exchange.SharedKernel.Models.Subscription
+﻿using System.Globalization;
+
+namespace Coinbase.Exchange.SharedKernel.Models.Subscription
 {
     public class CandleDetails
     {
@@ -9,6 +11,7 @@
         public decimal Close { get; set; }
         public decimal Volume { get; set; }
         public DateTime Date { get; set; }
+        public double Time { get; set; }
         public string product_id { get; set; }
     }
 }

@@ -53,7 +53,16 @@ namespace Coinbase.Exchange.Logic.Builders
         {
             var builder = new UriBuilder(UriBuilder.Uri);
 
-            builder.Path += resource;
+            if (builder.Path.EndsWith("/"))
+            {
+                builder.Path += resource;
+            }
+            else
+            {
+                builder.Path +=  $"/{resource}";
+            }
+
+            
 
             _httpClient.BaseAddress = builder.Uri;
 

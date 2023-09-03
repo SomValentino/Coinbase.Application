@@ -81,5 +81,12 @@ namespace Coinbase.Exchange.API.Controllers
             var accounts = await _coinbaseService.GetAllAccountAsync(queries);
             return Ok(accounts!.Accounts);
         }
+
+        [HttpGet("account/{accountId}")]
+        public async Task<IActionResult> GetAccount(string accountId)
+        {
+            var account = await _coinbaseService.GetAccountEntryAsync(accountId);
+            return Ok(account?.Account);
+        }
     }
 }

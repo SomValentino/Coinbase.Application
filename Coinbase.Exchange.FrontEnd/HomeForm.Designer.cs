@@ -68,7 +68,7 @@
             menuStrip1.Dock = DockStyle.Left;
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(30, 509);
+            menuStrip1.Size = new Size(30, 1061);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -98,7 +98,7 @@
             panel1.Controls.Add(label_bestoffer);
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1564, 509);
+            panel1.Size = new Size(1564, 1061);
             panel1.TabIndex = 1;
             // 
             // chart_candles
@@ -107,7 +107,7 @@
             chart_candles.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             chart_candles.Legends.Add(legend1);
-            chart_candles.Location = new Point(12, 154);
+            chart_candles.Location = new Point(12, 513);
             chart_candles.Name = "chart_candles";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Candlestick;
@@ -115,9 +115,10 @@
             series1.Name = "Volume";
             series1.YValuesPerPoint = 4;
             chart_candles.Series.Add(series1);
-            chart_candles.Size = new Size(667, 318);
+            chart_candles.Size = new Size(1528, 536);
             chart_candles.TabIndex = 23;
             chart_candles.Text = "chart1";
+            chart_candles.Click += chart_candles_Click;
             // 
             // label_balance_value
             // 
@@ -322,7 +323,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1563, 509);
+            ClientSize = new Size(1563, 1061);
             Controls.Add(panel1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
