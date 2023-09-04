@@ -68,7 +68,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
                     {
                         Name = instrument
                     });
-                    await _webSocketClient.SubScribe(new[] { instrument });
+                    
                 }
 
                 var isMember = group.Clients.Any(_ => _.ClientId == ClientId);
@@ -89,7 +89,7 @@ namespace Coinbase.Exchange.API.ExchangeHub
                     }
                 }
 
-
+                await _webSocketClient.SubScribe(new[] { instrument });
                 await _instrumentRepository.SaveChangesAsync();
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, instrument);

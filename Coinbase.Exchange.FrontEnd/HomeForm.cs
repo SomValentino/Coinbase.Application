@@ -2,12 +2,10 @@ using Coinbase.Exchange.FrontEnd.ApiClient;
 using Coinbase.Exchange.FrontEnd.Receivers;
 using Coinbase.Exchange.SharedKernel.Models.Account;
 using Coinbase.Exchange.SharedKernel.Models.ApiDto;
-using Coinbase.Exchange.SharedKernel.Models.Bids;
 using Coinbase.Exchange.SharedKernel.Models.Products;
 using Coinbase.Exchange.SharedKernel.Models.Subscription;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -52,6 +50,7 @@ namespace Coinbase.Exchange.FrontEnd
 
         private void MarketTraderReceiver_OnMarketDataUpdate(object? sender, MarketDataEventArgs e)
         {
+            _selected_instrumentIndex = _selected_instrumentIndex == -1 ? 0 : _selected_instrumentIndex;
             if (_subcribed_instruments.Any())
             {
                 var selected_instrument = _subcribed_instruments[_selected_instrumentIndex];
@@ -183,6 +182,10 @@ namespace Coinbase.Exchange.FrontEnd
                 await _hubConnection.StartAsync();
 
                 Load_Candle_Stick_data();
+                if (!_subcribed_instruments.Any())
+                    button_remove_instrument.Enabled = false;
+                else
+                    button_remove_instrument.Enabled = true;
             }
             catch (Exception ex)
             {
@@ -199,6 +202,12 @@ namespace Coinbase.Exchange.FrontEnd
 
         private void ClearDisplay()
         {
+            label_bestbid_value.Refresh();
+            label_bestoffer_value.Refresh();
+            dataGridView_bids.Refresh();
+            label_price_value.Refresh();
+            dataGridView_offers.Refresh();
+
             label_bestbid_value.Text = string.Empty;
             label_bestoffer_value.Text = string.Empty;
             label_price_value.Text = string.Empty;
@@ -213,12 +222,16 @@ namespace Coinbase.Exchange.FrontEnd
             {
                 series.Points.Clear();
             };
+            chart_candles.Titles.Clear();
+            chart_candles.DataSource = default;
+            chart_candles.DataBind();
         }
 
         private async void button_add_instrument_Click(object sender, EventArgs e)
         {
             try
             {
+                
                 var instruments = listBox_instruments.SelectedItems.Cast<string>().ToList();
 
                 await _hubConnection.InvokeAsync("SubscribeMultipleAsync", instruments);
@@ -230,9 +243,15 @@ namespace Coinbase.Exchange.FrontEnd
                 comboBox_instruments.DataSource = _subcribed_instruments;
                 listBox_instruments.DataSource = _instruments;
                 listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
+                _selected_instrumentIndex = 0;
+                comboBox_instruments.SelectedIndex = _selected_instrumentIndex;
+                if (_subcribed_instruments.Any())
+                    button_remove_instrument.Enabled = true;
 
                 MessageBox.Show($"Successfully subscribed to the following: {string.Join(",", instruments)} feed",
                    "Instrument Subscription", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                
             }
             catch (Exception)
             {
@@ -245,6 +264,7 @@ namespace Coinbase.Exchange.FrontEnd
         {
             try
             {
+                
                 var instruments = listBox_subscribed_instruments.SelectedItems.Cast<string>().ToList();
 
                 await _hubConnection.InvokeAsync("UnSubscribeMultipleAsync", instruments);
@@ -257,8 +277,24 @@ namespace Coinbase.Exchange.FrontEnd
                 listBox_subscribed_instruments.DataSource = _subcribed_instruments.ToList();
                 _selected_instrumentIndex = 0;
 
+               
+
                 MessageBox.Show($"Successfully unsubscribed to the following: {string.Join(",", instruments)} feed",
                     "Instrument Subscription", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                if (!_subcribed_instruments.Any())
+                {
+                    button_remove_instrument.Enabled = false;
+                    ClearDisplay();
+                }
+                else
+                {
+
+                    comboBox_instruments.SelectedIndex = _selected_instrumentIndex;
+                }
+
+
+
             }
             catch (Exception)
             {
@@ -293,18 +329,23 @@ namespace Coinbase.Exchange.FrontEnd
             if (_candles.Any())
             {
                 ClearChart();
-                chart_candles.Titles.Clear();
+                
                 chart_candles.ChartAreas["ChartArea1"].AxisX.MajorGrid.LineWidth = 0;
                 chart_candles.ChartAreas["ChartArea1"].AxisY.MajorGrid.LineWidth = 0;
 
-                var min = _candles.Min(_ => _.Low);
-                var max = _candles.Max(_ => _.High);
+                var candle_soource = _candles.Skip(Math.Max(0, _candles.Count() - 100)).ToList();
+
+                var min = candle_soource.Min(_ => _.Low);
+                var max = candle_soource.Max(_ => _.High);
 
                 var range = (max - min) / 2;
 
                 var interval = (max - min) / 4;
 
-                var candle = _candles.Last();
+                var candle = candle_soource.Last();
+
+                
+
 
                 var label = $"O{candle.Open} H{candle.High} L{candle.Low} C{candle.Close} V{candle.Volume}";
 
@@ -323,7 +364,7 @@ namespace Coinbase.Exchange.FrontEnd
                 chart_candles.DataManipulator.IsStartFromFirst = true;
                 chart_candles.DataSource = default;
                 var source = new BindingSource();
-                source.DataSource = _candles;
+                source.DataSource = candle_soource;
 
                 chart_candles.DataSource = source;
                 chart_candles.DataBind();
